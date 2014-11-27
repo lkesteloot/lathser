@@ -13,6 +13,7 @@ import images2gif
 # https://raw.githubusercontent.com/python-pillow/Pillow/master/Scripts/gifmaker.py
 import gifmaker
 
+# What kind of image to make. Use "L" for GIF compatibility.
 MODE = "L"
 WHITE = 255
 
@@ -131,6 +132,8 @@ class Triangle3D(object):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
 def render(triangles, width, height, angle):
+    print "Rendering at angle %g" % int(angle*180/math.pi)
+
     bbox = BoundingBox()
 
     transform = Transform.makeIdentity()
@@ -139,7 +142,7 @@ def render(triangles, width, height, angle):
         triangle2d = triangle.project(transform, 0)
         bbox.addTriangle(triangle2d)
 
-    print "Model bounding box:", bbox
+    # print "Model bounding box:", bbox
 
     # Pad so we don't run into the edge of the image.
     bbox.addMargin(bbox.width()/20)
@@ -161,37 +164,40 @@ def render(triangles, width, height, angle):
 def loadFile(filename):
     data = json.load(open(filename))
 
-    if len(data["meshes"]) != 1:
-        print "Must have exactly one mesh."
-        sys.exit(1)
+    vertices = []
+    triangles = []
 
-    mesh = data["meshes"][0]
-    rawVertices = mesh["vertices"]
-    rawNormals = mesh["normals"]
-    rawFaces = mesh["faces"]
+    for mesh in data["meshes"]:
+        rawVertices = mesh["vertices"]
+        rawNormals = mesh["normals"]
+        rawFaces = mesh["faces"]
 
-    vertices = [Vertex3D(
-        rawVertices[i*3 + 0],
-        rawVertices[i*3 + 1],
-        rawVertices[i*3 + 2],
-        rawNormals[i*3 + 0],
-        rawNormals[i*3 + 1],
-        rawNormals[i*3 + 2]) for i in range(len(rawVertices)/3)]
+        vertexOffset = len(vertices)
 
-    triangles = [Triangle3D(
-        vertices[face[0]],
-        vertices[face[1]],
-        vertices[face[2]]) for face in rawFaces]
+        vertices.extend([Vertex3D(
+            rawVertices[i*3 + 0],
+            rawVertices[i*3 + 1],
+            rawVertices[i*3 + 2],
+            rawNormals[i*3 + 0],
+            rawNormals[i*3 + 1],
+            rawNormals[i*3 + 2]) for i in range(len(rawVertices)/3)])
 
-    return vertices, triangles
+        triangles.extend([Triangle3D(
+            vertices[vertexOffset + face[0]],
+            vertices[vertexOffset + face[1]],
+            vertices[vertexOffset + face[2]]) for face in rawFaces])
+
+    return triangles
 
 def angles(count):
     return [angle*math.pi*2/count for angle in range(count)]
 
 def main():
     filename = "data/LargeKnight.json"
+    # filename = "data/My_Scan_1.json"
 
-    vertices, triangles = loadFile(filename)
+    triangles = loadFile(filename)
+    print "The model has %d triangles." % len(triangles)
 
     if False:
         img = render(triangles, 1024, 1024)
