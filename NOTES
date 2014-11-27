@@ -1,0 +1,21 @@
+
+Plan:
+
+    - Use JSON input file format.
+    - Make an in-memory mesh.
+    - Specify on command line:
+        - The axis of rotation
+        - X,Y of center.
+        - Number of steps.
+    - Then:
+        - For each step:
+            - Transform model.
+            - Fully render at high resolution, opaquely.
+                - Use 2D point-in-polygon like PixelPlanes.
+            - Detect edge. Can use one line per pixel or smooth it out.
+            - Generate SVG.
+
+Notes:
+
+    - Convert with: http://www.greentoken.de/onlineconv/
+
