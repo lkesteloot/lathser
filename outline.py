@@ -2,7 +2,6 @@
 import sys
 import json
 import math
-import cStringIO as StringIO
 
 # pip install Pillow
 from PIL import Image, ImageDraw
@@ -199,16 +198,13 @@ def main():
         img.save("out.png")
     else:
         images = [render(triangles, 256, 256, angle) for angle in angles(20)]
-        # gifOut = StringIO.StringIO()
-        # img.save(gifOut, "GIF")
-        # print "Gif has size", len(gifOut.getvalue())
-        # gifIn = StringIO.StringIO(gifOut.getvalue())
-        # img = Image.open(gifIn)
+
         fp = open("out.gif", "wb")
         gifmaker.makedelta(fp, images)
         fp.close()
 
-        # images2gif.writeGif("out2.gif", images)
+        # Fails:
+        ## images2gif.writeGif("out2.gif", images)
 
 if __name__ == "__main__":
     main()
