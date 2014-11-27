@@ -2,9 +2,20 @@
 import sys
 import json
 import math
+import cStringIO as StringIO
 
 # pip install Pillow
 from PIL import Image, ImageDraw
+from PIL.GifImagePlugin import getheader, getdata
+
+# https://code.google.com/p/visvis/source/browse/#hg/vvmovie
+import images2gif
+
+# https://raw.githubusercontent.com/python-pillow/Pillow/master/Scripts/gifmaker.py
+import gifmaker
+
+MODE = "L"
+WHITE = 255
 
 class Transform(object):
     # The transform takes model coordinate (x,y) and computes (x*scale + offx,
@@ -96,8 +107,14 @@ class Vertex3D(object):
         self.ny = ny
         self.nz = nz
 
-    def project(self, transform):
-        x, y = transform.transform(self.y, -self.z)
+    def project(self, transform, angle):
+        # Rotate around Z axis.
+        rx = math.cos(angle)*self.x - math.sin(angle)*self.y
+        ry = math.sin(angle)*self.x + math.cos(angle)*self.y
+        rz = self.z
+
+        x, y = transform.transform(ry, -rz)
+
         return Vertex2D(x, y)
 
 class Triangle2D(object):
@@ -111,16 +128,16 @@ class Triangle3D(object):
         self.v3 = v3
         self.vertices = [v1, v2, v3]
 
-    def project(self, transform):
-        return Triangle2D([vertex.project(transform) for vertex in self.vertices])
+    def project(self, transform, angle):
+        return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
-def render(triangles, width, height):
+def render(triangles, width, height, angle):
     bbox = BoundingBox()
 
     transform = Transform.makeIdentity()
 
     for triangle in triangles:
-        triangle2d = triangle.project(transform)
+        triangle2d = triangle.project(transform, 0)
         bbox.addTriangle(triangle2d)
 
     print "Model bounding box:", bbox
@@ -131,16 +148,16 @@ def render(triangles, width, height):
     transform = Transform.makeMap(bbox, width, height)
 
     # Render.
-    img = Image.new("1", (width, height))
+    img = Image.new(MODE, (width, height))
     draw = ImageDraw.Draw(img)
 
     for triangle in triangles:
-        triangle2d = triangle.project(transform)
+        triangle2d = triangle.project(transform, angle)
         tbbox = BoundingBox()
         tbbox.addTriangle(triangle2d)
-        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=1, outline=1)
+        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=WHITE, outline=WHITE)
 
-    img.save("out.png", "PNG")
+    return img
 
 def loadFile(filename):
     data = json.load(open(filename))
@@ -169,11 +186,29 @@ def loadFile(filename):
 
     return vertices, triangles
 
+def angles(count):
+    return [angle*math.pi*2/count for angle in range(count)]
+
 def main():
     filename = "data/LargeKnight.json"
 
     vertices, triangles = loadFile(filename)
-    image = render(triangles, 1024, 1024)
+
+    if False:
+        img = render(triangles, 1024, 1024)
+        img.save("out.png")
+    else:
+        images = [render(triangles, 256, 256, angle) for angle in angles(20)]
+        # gifOut = StringIO.StringIO()
+        # img.save(gifOut, "GIF")
+        # print "Gif has size", len(gifOut.getvalue())
+        # gifIn = StringIO.StringIO(gifOut.getvalue())
+        # img = Image.open(gifIn)
+        fp = open("out.gif", "wb")
+        gifmaker.makedelta(fp, images)
+        fp.close()
+
+        # images2gif.writeGif("out2.gif", images)
 
 if __name__ == "__main__":
     main()
