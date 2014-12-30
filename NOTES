@@ -20,10 +20,36 @@ To do next:
     - The model bounding box should only be calculated once, for all rotations,
         so that the model doesn't shift during rotation.
 
-
 Notes:
 
     - Convert model with: http://www.greentoken.de/onlineconv/
+
+Research:
+
+    - Vectorization:
+        - http://en.wikipedia.org/wiki/Vectorization_(image_tracing)
+        - http://stackoverflow.com/questions/6772230/is-there-some-well-known-algorithm-which-turns-users-drawings-into-smoothed-sha
+        - http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
+            - Simplify list of points by eliminating points that are within epsilon
+                of a simpler line sequence.
+        - http://outliner.codeplex.com/
+            - Has several DOC files for documentation, but I don't have a high-level
+              idea of how it works.
+        - https://code.google.com/p/shapelogic/wiki/vectorization
+            - Not much info. Preferred algorithm is: "The main idea is that
+              this will read a whole multi line at a time. Then later it will
+              split it according to max distance of pixels to the line between
+              start and end point of the multi line."
+        - http://cardhouse.com/computer/vector.htm
+            - Generate four vectors for each pixel that's on.
+            - Remove pairs of identical pixels.
+            - Coalesce co-linear vectors.
+        - Proposal:
+            - For every pixel:
+                - If different horizontally or vertically, insert edge.
+            - Start with any edge, find connecting edge and link into a list.
+            - Run simplification algorithm.
+            - Generate SVG with points.
 
 Models:
 
