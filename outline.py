@@ -22,9 +22,6 @@ import collections
 from PIL import Image, ImageDraw
 from PIL.GifImagePlugin import getheader, getdata
 
-# https://code.google.com/p/visvis/source/browse/#hg/vvmovie
-import images2gif
-
 # https://raw.githubusercontent.com/python-pillow/Pillow/master/Scripts/gifmaker.py
 import gifmaker
 
@@ -565,9 +562,6 @@ def main():
         fp = open("out.gif", "wb")
         gifmaker.makedelta(fp, images)
         fp.close()
-
-        # Fails:
-        ## images2gif.writeGif("out2.gif", images)
 
     # Single SVG.
     if False:
