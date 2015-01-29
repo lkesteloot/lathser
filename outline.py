@@ -31,7 +31,7 @@ TARGET_VIEW, TARGET_CUT = range(2)
 TARGET = TARGET_CUT
 
 # Final position in inches.
-FINAL_X = 1.25 + 0.045
+FINAL_X = 1.25 - 0.045
 FINAL_Y = 1
 
 RENDER_SCALE = 5
@@ -357,6 +357,27 @@ def render(triangles, width, height, angle):
 
     return img, transform
 
+def get_base_height(image):
+    width, height = image.size
+
+    for y in range(height):
+        for x in range(width):
+            pixel = image.getpixel((x, height - 1 - y))
+            if pixel != 0:
+                return y
+
+    raise Exception("base not found")
+
+def add_base(image):
+    width, height = image.size
+    base_height = get_base_height(image)
+
+    for y in range(base_height):
+        for x in range(width):
+            image.putpixel((x, height - 1 - y), RASTER_WHITE)
+
+    return image
+
 def loadFile(filename):
     print "Loading model..."
     data = json.load(open(filename))
@@ -386,8 +407,8 @@ def loadFile(filename):
 def angles(count):
     return [angle*math.pi*2/count for angle in range(count)]
 
-# Return a list of Vertex2D().
-def get_outline(image):
+# Return a list of paths of Vertex2D().
+def get_outlines(image):
     edges = []
 
     # Generate edges for each pixel.
@@ -415,7 +436,9 @@ def get_outline(image):
 
     # Walk around, starting at any edge.
     print "Making sequence of vertices..."
+    paths = []
     vertices = []
+    paths.append(vertices)
     edge = edges[0]
     vertices.append(edge.v1)
     vertex = edge.v2
@@ -424,10 +447,11 @@ def get_outline(image):
         vertices.append(vertex)
         connected_edges = [edge for edge in edgemap[vertex] if not edge.used]
         if not connected_edges:
-            break
             edges = [edge for edge in edges if not edge.used]
             if not edges:
                 break
+            vertices = []
+            paths.append(vertices)
             edge = edges[0]
         else:
             edge = connected_edges[0]
@@ -438,7 +462,7 @@ def get_outline(image):
     edges = [edge for edge in edges if not edge.used]
     print "Sequence has %d vertices, with %d edges unused." % (len(vertices), len(edges))
 
-    return vertices
+    return paths
 
 def shortest_distance_to_segment(v, v1, v2):
     segment = v1 - v2
@@ -477,9 +501,7 @@ def simplify_vertices(vertices, epsilon):
 
 def transform_vertices(vertices, transform, scale):
     # Compute the inverse transform.
-    print "Orig transform:", transform
     transform = transform.invert()
-    print "Inverse transform:", transform
 
     # Scale to final size.
     transform = transform.scaled(scale)
@@ -489,7 +511,7 @@ def transform_vertices(vertices, transform, scale):
 
     return [transform.transformVertex2D(v) for v in vertices]
 
-def generate_svg(filename, vertices):
+def generate_svg(filename, paths):
     out = open(filename, "w")
     out.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
@@ -498,10 +520,11 @@ def generate_svg(filename, vertices):
 ]>
 <svg xmlns="&ns_svg;" width="%d" height="%d" overflow="visible" style="background: %s">
 """ % (SVG_WIDTH, SVG_HEIGHT, BACKGROUND_COLOR))
-    out.write("""<polyline fill="none" stroke="%s" stroke-width="%g" points=" """ % (FOREGROUND_COLOR, STROKE_WIDTH))
-    for vertex in vertices:
-        out.write(" %g,%g" % (vertex.x, vertex.y))
-    out.write(""" "/>\n""")
+    for vertices in paths:
+        out.write("""<polyline fill="none" stroke="%s" stroke-width="%g" points=" """ % (FOREGROUND_COLOR, STROKE_WIDTH))
+        for vertex in vertices:
+            out.write(" %g,%g" % (vertex.x, vertex.y))
+        out.write(""" "/>\n""")
     out.write("""</svg>
 """)
     out.close()
@@ -517,7 +540,8 @@ def main():
 
     # Single image.
     if False:
-        img, _ = render(triangles, 1024, 1024)
+        img, _ = render(triangles, 1024, 1024, 0)
+        img = add_base(img)
         img.save("out.png")
 
     # Animated GIF.
@@ -534,10 +558,9 @@ def main():
     # Single SVG.
     if False:
         image, _ = render(triangles, 256*5, 256*5, 0)
-        vertices = get_outline(image)
-        vertices = simplify_vertices(vertices, 1)
-        print "Have %d vertices after simplification." % len(vertices)
-        generate_svg("out.svg", vertices)
+        paths = get_outlines(image)
+        paths = [simplify_vertices(vertices, 1) for vertices in paths]
+        generate_svg("out.svg", paths)
 
     # All SVGs.
     if True:
@@ -555,15 +578,14 @@ def main():
         size = bbox3d.size()
         max_size = max(size.x, size.y)
         scale = MODEL_DIAMETER / max_size * DPI
-        print "Scale:", MODEL_DIAMETER, max_size, scale
 
         for index, angle in enumerate(angles(ANGLE_COUNT)):
             image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
-            vertices = get_outline(image)
-            vertices = simplify_vertices(vertices, 1)
-            vertices = transform_vertices(vertices, transform, scale)
-            print "Have %d vertices after simplification." % len(vertices)
-            generate_svg("out%02d.svg" % index, vertices)
+            image = add_base(image)
+            paths = get_outlines(image)
+            paths = [simplify_vertices(vertices, 1) for vertices in paths]
+            paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
+            generate_svg("out%02d.svg" % index, paths)
 
 if __name__ == "__main__":
     main()
