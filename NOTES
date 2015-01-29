@@ -1,28 +1,15 @@
 
-Plan:
-
-    - Use JSON input file format.
-    - Make an in-memory mesh.
-    - Specify on command line:
-        - The axis of rotation
-        - X,Y of center.
-        - Number of steps.
-    - Then:
-        - For each step:
-            - Transform model.
-            - Fully render at high resolution, opaquely.
-                - Use 2D point-in-polygon like PixelPlanes.
-            - Detect edge. Can use one line per pixel or smooth it out.
-            - Generate sequence of SVG.
-
 To do next:
 
+    - get_outline() should return a list of outlines.
+        - Find an angle that has a hole in it to test.
     - The model bounding box should only be calculated once, for all rotations,
         so that the model doesn't shift during rotation.
 
 Notes:
 
     - Convert model with: http://www.greentoken.de/onlineconv/
+        - Make JSON output.
 
 Research:
 

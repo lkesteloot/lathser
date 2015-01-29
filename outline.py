@@ -15,12 +15,82 @@ import images2gif
 import gifmaker
 
 # What kind of image to make. Use "L" for GIF compatibility.
-MODE = "L"
-WHITE = 255
+RASTER_MODE = "L"
+RASTER_WHITE = 255
+
+# Diameter in inches.
+ROD_DIAMETER = 0.8
+# Total margin as a fraction of the diameter.
+MARGIN = 0.1
+MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
+
+ANGLE_COUNT = 16
+
+# What we're targeting (viewing in Chrome or cutting on the laser cutter).
+TARGET_VIEW, TARGET_CUT = range(2)
+TARGET = TARGET_CUT
+
+# Final position in inches.
+FINAL_X = 1.25 + 0.045
+FINAL_Y = 1
+
+RENDER_SCALE = 5
+
+DPI = 72
+SVG_WIDTH = 32*DPI
+SVG_HEIGHT = 20*DPI
 
 # "Hairline" in AI.
-STROKE_WIDTH = 0.001
-STROKE_WIDTH = 1
+if TARGET == TARGET_CUT:
+    STROKE_WIDTH = 0.001
+    FOREGROUND_COLOR = "black"
+    BACKGROUND_COLOR = "white"
+else:
+    STROKE_WIDTH = 1
+    FOREGROUND_COLOR = "white"
+    BACKGROUND_COLOR = "black"
+
+class Vector3(object):
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __str__(self):
+        return "Vector3[%g,%g,%g]" % (self.x, self.y, self.z)
+
+    def __repr__(self):
+        return str(self)
+
+    def __neg__(self):
+        return Vector3(-self.x, -self.y, -self.z)
+
+    def __add__(self, other):
+        return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, other):
+        return Vector3(self.x*other, self.y*other, self.z*other)
+
+    def __div__(self, other):
+        return Vector3(self.x/other, self.y/other, self.z/other)
+
+    def dot(self, other):
+        return self.x*other.x + self.y*other.y + self.z*other.z
+
+    def length(self):
+        return sqrt(self.dot(self))
+
+    def normalized(self):
+        return self/self.length()
+
+    def min(self, other):
+        return Vector3(min(self.x, other.x), min(self.y, other.y), min(self.z, other.z))
+
+    def max(self, other):
+        return Vector3(max(self.x, other.x), max(self.y, other.y), max(self.z, other.z))
 
 class Transform(object):
     # The transform takes model coordinate (x,y) and computes (x*scale + offx,
@@ -30,8 +100,28 @@ class Transform(object):
         self.offx = offx
         self.offy = offy
 
+    def __str__(self):
+        return "Trans[%g,(%g,%g)]" % (self.scale, self.offx, self.offy)
+
     def transform(self, x, y):
         return x*self.scale + self.offx, y*self.scale + self.offy
+
+    def transformVertex2D(self, v):
+        x, y = self.transform(v.x, v.y)
+        return Vertex2D(x, y)
+
+    def invert(self):
+        # x' = x*scale + offx
+        # x' - offx = x*scale
+        # x = (x' - offx)/scale
+        # x = x'/scale - offx/scale
+        return Transform(1.0/self.scale, -self.offx/self.scale, -self.offy/self.scale)
+
+    def scaled(self, scale):
+        return Transform(self.scale*scale, self.offx*scale, self.offy*scale)
+
+    def translated(self, dx, dy):
+        return Transform(self.scale, self.offx + dx, self.offy + dy)
 
     @staticmethod
     def makeMap(bbox, width, height):
@@ -98,6 +188,39 @@ class BoundingBox(object):
     def __str__(self):
         return "BBOX([%g,%g] - [%g,%g])" % (self.minx, self.miny, self.maxx, self.maxy)
 
+class BoundingBox3D(object):
+    def __init__(self):
+        self.min = Vector3(sys.float_info.max, sys.float_info.max, sys.float_info.max)
+        self.max = Vector3(sys.float_info.min, sys.float_info.min, sys.float_info.min)
+
+    def addPoint(self, v):
+        self.min = self.min.min(v)
+        self.max = self.max.max(v)
+
+    def addVertex(self, vertex):
+        self.addPoint(vertex.p)
+
+    def addTriangle(self, triangle):
+        for vertex in triangle.vertices:
+            self.addVertex(vertex)
+
+    def addMargin(self, margin):
+        self.min.x -= margin
+        self.min.y -= margin
+        self.min.z -= margin
+        self.max.x += margin
+        self.max.y += margin
+        self.max.z += margin
+
+    def size(self):
+        return self.max - self.min
+
+    def center(self):
+        return self.min + self.size()/2
+
+    def __str__(self):
+        return "BBOX([%g,%g,%g] - [%g,%g,%g])" % (self.min.x, self.min.y, self.min.z, self.max.x, self.max.y, self.max.z)
+
 class Vertex2D(object):
     def __init__(self, x, y):
         self.x = x
@@ -162,37 +285,35 @@ class Vertex2D(object):
         return self.x, self.y
 
 class Vertex3D(object):
-    def __init__(self, x, y, z, nx, ny, nz):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.nx = nx
-        self.ny = ny
-        self.nz = nz
+    def __init__(self, p):
+        self.p = p
 
     def project(self, transform, angle):
         # Rotate around Z axis.
-        rx = math.cos(angle)*self.x - math.sin(angle)*self.y
-        ry = math.sin(angle)*self.x + math.cos(angle)*self.y
-        rz = self.z
+        rx = math.cos(angle)*self.p.x - math.sin(angle)*self.p.y
+        ry = math.sin(angle)*self.p.x + math.cos(angle)*self.p.y
+        rz = self.p.z
 
-        x, y = transform.transform(ry, -rz)
+        x, y = transform.transform(ry, rz)
 
         return Vertex2D(x, y)
+
+    def translate(self, vector3):
+        return Vertex3D(self.p + vector3)
 
 class Triangle2D(object):
     def __init__(self, vertices):
         self.vertices = vertices
 
 class Triangle3D(object):
-    def __init__(self, v1, v2, v3):
-        self.v1 = v1
-        self.v2 = v2
-        self.v3 = v3
-        self.vertices = [v1, v2, v3]
+    def __init__(self, vertices):
+        self.vertices = vertices
 
     def project(self, transform, angle):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
+
+    def translate(self, vector3):
+        return Triangle3D([v.translate(vector3) for v in self.vertices])
 
 class Edge(object):
     def __init__(self, v1, v2):
@@ -214,7 +335,7 @@ def render(triangles, width, height, angle):
     transform = Transform.makeIdentity()
 
     for triangle in triangles:
-        triangle2d = triangle.project(transform, 0)
+        triangle2d = triangle.project(transform, angle)
         bbox.addTriangle(triangle2d)
 
     # print "Model bounding box:", bbox
@@ -225,18 +346,19 @@ def render(triangles, width, height, angle):
     transform = Transform.makeMap(bbox, width, height)
 
     # Render.
-    img = Image.new(MODE, (width, height))
+    img = Image.new(RASTER_MODE, (width, height))
     draw = ImageDraw.Draw(img)
 
     for triangle in triangles:
         triangle2d = triangle.project(transform, angle)
         tbbox = BoundingBox()
         tbbox.addTriangle(triangle2d)
-        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=WHITE, outline=WHITE)
+        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=RASTER_WHITE, outline=RASTER_WHITE)
 
-    return img
+    return img, transform
 
 def loadFile(filename):
+    print "Loading model..."
     data = json.load(open(filename))
 
     vertices = []
@@ -250,17 +372,14 @@ def loadFile(filename):
         vertexOffset = len(vertices)
 
         vertices.extend([Vertex3D(
-            rawVertices[i*3 + 0],
-            rawVertices[i*3 + 1],
-            rawVertices[i*3 + 2],
-            rawNormals[i*3 + 0],
-            rawNormals[i*3 + 1],
-            rawNormals[i*3 + 2]) for i in range(len(rawVertices)/3)])
+                Vector3(rawVertices[i*3 + 0], rawVertices[i*3 + 1], rawVertices[i*3 + 2])
+                ## Vector3(rawNormals[i*3 + 0], rawNormals[i*3 + 1], rawNormals[i*3 + 2])
+            ) for i in range(len(rawVertices)/3)])
 
-        triangles.extend([Triangle3D(
+        triangles.extend([Triangle3D([
             vertices[vertexOffset + face[0]],
             vertices[vertexOffset + face[1]],
-            vertices[vertexOffset + face[2]]) for face in rawFaces])
+            vertices[vertexOffset + face[2]]]) for face in rawFaces])
 
     return triangles
 
@@ -356,20 +475,32 @@ def simplify_vertices(vertices, epsilon):
         # None are far enough, just keep the ends.
         return [vertices[first], vertices[last]]
 
-def generate_svg(filename, image, vertices):
-    width, height = image.size
-    scale = 5
+def transform_vertices(vertices, transform, scale):
+    # Compute the inverse transform.
+    print "Orig transform:", transform
+    transform = transform.invert()
+    print "Inverse transform:", transform
+
+    # Scale to final size.
+    transform = transform.scaled(scale)
+
+    # Move to right position.
+    transform = transform.translated(FINAL_X*DPI, FINAL_Y*DPI)
+
+    return [transform.transformVertex2D(v) for v in vertices]
+
+def generate_svg(filename, vertices):
     out = open(filename, "w")
     out.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
 "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
 <!ENTITY ns_svg "http://www.w3.org/2000/svg">
 ]>
-<svg xmlns="&ns_svg;" width="%d" height="%d" overflow="visible" style="background: black">
-""" % (width*scale, height*scale))
-    out.write("""<polyline fill="none" stroke="%s" stroke-width="%g" points=" """ % ("white", STROKE_WIDTH))
+<svg xmlns="&ns_svg;" width="%d" height="%d" overflow="visible" style="background: %s">
+""" % (SVG_WIDTH, SVG_HEIGHT, BACKGROUND_COLOR))
+    out.write("""<polyline fill="none" stroke="%s" stroke-width="%g" points=" """ % (FOREGROUND_COLOR, STROKE_WIDTH))
     for vertex in vertices:
-        out.write(" %g,%g" % (vertex.x*scale, (height - vertex.y)*scale))
+        out.write(" %g,%g" % (vertex.x, vertex.y))
     out.write(""" "/>\n""")
     out.write("""</svg>
 """)
@@ -384,12 +515,14 @@ def main():
     triangles = loadFile(filename)
     print "The model has %d triangles." % len(triangles)
 
+    # Single image.
     if False:
-        img = render(triangles, 1024, 1024)
+        img, _ = render(triangles, 1024, 1024)
         img.save("out.png")
 
+    # Animated GIF.
     if False:
-        images = [render(triangles, 256, 256, angle) for angle in angles(20)]
+        images = [render(triangles, 256, 256, angle)[0] for angle in angles(ANGLE_COUNT)]
 
         fp = open("out.gif", "wb")
         gifmaker.makedelta(fp, images)
@@ -398,12 +531,39 @@ def main():
         # Fails:
         ## images2gif.writeGif("out2.gif", images)
 
-    if True:
-        image = render(triangles, 256, 256, 0)
+    # Single SVG.
+    if False:
+        image, _ = render(triangles, 256*5, 256*5, 0)
         vertices = get_outline(image)
         vertices = simplify_vertices(vertices, 1)
         print "Have %d vertices after simplification." % len(vertices)
-        generate_svg("out.svg", image, vertices)
+        generate_svg("out.svg", vertices)
+
+    # All SVGs.
+    if True:
+        bbox3d = BoundingBox3D()
+        for triangle in triangles:
+            bbox3d.addTriangle(triangle)
+
+        center = bbox3d.center()
+        print "Center of bbox3d:", center
+
+        # Move center to origin.
+        triangles = [triangle.translate(-center) for triangle in triangles]
+
+        # Find scaling factor.
+        size = bbox3d.size()
+        max_size = max(size.x, size.y)
+        scale = MODEL_DIAMETER / max_size * DPI
+        print "Scale:", MODEL_DIAMETER, max_size, scale
+
+        for index, angle in enumerate(angles(ANGLE_COUNT)):
+            image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
+            vertices = get_outline(image)
+            vertices = simplify_vertices(vertices, 1)
+            vertices = transform_vertices(vertices, transform, scale)
+            print "Have %d vertices after simplification." % len(vertices)
+            generate_svg("out%02d.svg" % index, vertices)
 
 if __name__ == "__main__":
     main()
