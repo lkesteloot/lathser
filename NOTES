@@ -1,15 +1,26 @@
 
 To do next:
 
-    - get_outline() should return a list of outlines.
-        - Find an angle that has a hole in it to test.
-    - The model bounding box should only be calculated once, for all rotations,
-        so that the model doesn't shift during rotation.
+    - Clean up code.
+    - Proper transform class.
+    - Handle non-closed paths properly.
+    - Compensate for the kerf. That's a straight convolution at the raster pass
+      with a flat circle. The diameter of the circle is that of the laser. The
+      trick here is that I have to figure out the diameter in raster pixels by
+      inverting the later transformation.
+    - Support spiraling inwards. I think I can do this at the raster pass by
+      filling in the middle 80% of the width of the image with white for the
+      first pass, then 60%, etc., reducing it each time.
+    - Add cut lines to let smaller pieces fall off. Not sure how to do this.
+      Could try doing it at the raster layer (by drawing radial lines to the
+      edges) but that might leave artifacts on the edge of the piece.
 
 Notes:
 
     - Convert model with: http://www.greentoken.de/onlineconv/
         - Make JSON output.
+    - Name: Lathser (/lathe-zer/)
+    - http://en.wikipedia.org/wiki/Visual_hull
 
 Research:
 

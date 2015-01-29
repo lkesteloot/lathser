@@ -414,8 +414,8 @@ def get_outlines(image):
     # Generate edges for each pixel.
     print "Generating edges..."
     width, height = image.size
-    for y in range(height - 1):
-        for x in range(width - 1):
+    for x in range(width - 1):
+        for y in range(height - 1):
             this = image.getpixel((x, y))
             right = image.getpixel((x + 1, y))
             down = image.getpixel((x, y + 1))
