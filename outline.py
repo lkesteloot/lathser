@@ -31,28 +31,35 @@ RASTER_WHITE = 255
 
 # Diameter in inches.
 ROD_DIAMETER = 0.8
-# Total margin as a fraction of the diameter.
+# Total margin within rod as a fraction of the diameter.
 MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
+# Number of cuts.
 ANGLE_COUNT = 16
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
-TARGET = TARGET_CUT
+TARGET = TARGET_VIEW
 
-# Final position in inches.
+# Final position of model in inches. The rig centers
+# the rod at 1.25 inches from the left, and the laser
+# cutter itself considers "0" to be about 0.045 inches
+# from the left.
 FINAL_X = 1.25 - 0.045
 FINAL_Y = 1
 
+# Number of times to scale up the rendering. 1 will be fast
+# but low-res, 5 is slower but high-res.
 RENDER_SCALE = 5
 
+# Size of the laser bed.
 DPI = 72
 SVG_WIDTH = 32*DPI
 SVG_HEIGHT = 20*DPI
 
-# "Hairline" in AI.
 if TARGET == TARGET_CUT:
+    # "Hairline" in AI.
     STROKE_WIDTH = 0.001
     FOREGROUND_COLOR = "black"
     BACKGROUND_COLOR = "white"
@@ -61,6 +68,71 @@ else:
     FOREGROUND_COLOR = "white"
     BACKGROUND_COLOR = "black"
 
+# A 2D vector.
+class Vector2(object):
+    def __init__(self, x, y):
+        self.x = float(x)
+        self.y = float(y)
+
+    def __str__(self):
+        return "Vector2[%g,%g]" % (self.x, self.y)
+
+    def __repr__(self):
+        return str(self)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __neg__(self):
+        return Vector2(-self.x, -self.y)
+
+    def __add__(self, other):
+        return Vector2(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Vector2(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+        return Vector2(self.x*other, self.y*other)
+
+    def __div__(self, other):
+        return Vector2(self.x/other, self.y/other)
+
+    def dot(self, other):
+        return self.x*other.x + self.y*other.y
+
+    def length(self):
+        return math.sqrt(self.dot(self))
+
+    def normalized(self):
+        return self/self.length()
+
+    # Component-wise min.
+    def min(self, other):
+        return Vector2(min(self.x, other.x), min(self.y, other.y))
+
+    # Component-wise max.
+    def max(self, other):
+        return Vector2(max(self.x, other.x), max(self.y, other.y))
+
+    # Rotated 90 counter-clockwise.
+    def reciprocal(self):
+        return Vector2(-self.y, self.x)
+
+    # Returns angle in radians.
+    def angle(self):
+        return math.atan2(self.y, self.x)
+
+    def flipX(self):
+        return Vector2(-self.x, self.y)
+
+    def flipY(self):
+        return Vector2(self.x, -self.y)
+
+# A 3D vector.
 class Vector3(object):
     def __init__(self, x, y, z):
         self.x = float(x)
@@ -92,17 +164,30 @@ class Vector3(object):
         return self.x*other.x + self.y*other.y + self.z*other.z
 
     def length(self):
-        return sqrt(self.dot(self))
+        return math.sqrt(self.dot(self))
 
     def normalized(self):
         return self/self.length()
 
+    # Component-wise min.
     def min(self, other):
         return Vector3(min(self.x, other.x), min(self.y, other.y), min(self.z, other.z))
 
+    # Component-wise max.
     def max(self, other):
         return Vector3(max(self.x, other.x), max(self.y, other.y), max(self.z, other.z))
 
+    def project(self, transform, angle):
+        # Rotate around Z axis.
+        rx = math.cos(angle)*self.x - math.sin(angle)*self.y
+        ry = math.sin(angle)*self.x + math.cos(angle)*self.y
+        rz = self.z
+
+        x, y = transform.transform(ry, rz)
+
+        return Vector2(x, y)
+
+# Represents a 2D transformation.
 class Transform(object):
     # The transform takes model coordinate (x,y) and computes (x*scale + offx,
     # y*scale+offy).
@@ -119,7 +204,7 @@ class Transform(object):
 
     def transformVertex2D(self, v):
         x, y = self.transform(v.x, v.y)
-        return Vertex2D(x, y)
+        return Vector2(x, y)
 
     def invert(self):
         # x' = x*scale + offx
@@ -136,84 +221,65 @@ class Transform(object):
 
     @staticmethod
     def makeMap(bbox, width, height):
-        if bbox.width()/bbox.height() < float(width)/height:
+        size = bbox.size()
+
+        if size.x/size.y < float(width)/height:
             # Left/right margins. Fit height.
-            scale = height/bbox.height()
+            scale = height/size.y
         else:
             # Bottom/top margins. Fit width.
-            scale = width/bbox.width()
+            scale = width/size.x
 
-        offx = width/2.0 - bbox.centerx()*scale
-        offy = height/2.0 - bbox.centery()*scale
+        offset = Vector2(width, height)/2.0 - bbox.center()*scale
 
-        return Transform(scale, offx, offy)
+        return Transform(scale, offset.x, offset.y)
 
     @staticmethod
     def makeIdentity():
         return Transform(1, 0, 0)
 
-class BoundingBox(object):
+# 2D bounding box.
+class BoundingBox2D(object):
     def __init__(self):
-        self.miny = sys.float_info.max
-        self.minx = sys.float_info.max
-        self.maxx = -sys.float_info.max
-        self.maxy = -sys.float_info.max
-
-    def addPoint(self, x, y):
-        self.minx = min(self.minx, x)
-        self.miny = min(self.miny, y)
-        self.maxx = max(self.maxx, x)
-        self.maxy = max(self.maxy, y)
-
-    def addVertex(self, vertex):
-        self.addPoint(vertex.x, vertex.y)
-
-    def addTriangle(self, triangle):
-        for vertex in triangle.vertices:
-            self.addVertex(vertex)
-
-    def addMargin(self, margin):
-        self.minx -= margin
-        self.miny -= margin
-        self.maxx += margin
-        self.maxy += margin
-
-    def width(self):
-        return self.maxx - self.minx
-
-    def height(self):
-        return self.maxy - self.miny
-
-    def centerx(self):
-        return self.minx + self.width()/2
-
-    def centery(self):
-        return self.miny + self.height()/2
-
-    def rangex(self):
-        return range(int(math.floor(self.minx)), int(math.floor(self.maxx)) + 1)
-
-    def rangey(self):
-        return range(int(math.floor(self.miny)), int(math.floor(self.maxy)) + 1)
-
-    def __str__(self):
-        return "BBOX([%g,%g] - [%g,%g])" % (self.minx, self.miny, self.maxx, self.maxy)
-
-class BoundingBox3D(object):
-    def __init__(self):
-        self.min = Vector3(sys.float_info.max, sys.float_info.max, sys.float_info.max)
-        self.max = Vector3(sys.float_info.min, sys.float_info.min, sys.float_info.min)
+        self.min = Vector2(sys.float_info.max, sys.float_info.max)
+        self.max = Vector2(-sys.float_info.max, -sys.float_info.max)
 
     def addPoint(self, v):
         self.min = self.min.min(v)
         self.max = self.max.max(v)
 
-    def addVertex(self, vertex):
-        self.addPoint(vertex.p)
+    def addTriangle(self, triangle):
+        for vertex in triangle.vertices:
+            self.addPoint(vertex)
+
+    def addMargin(self, margin):
+        self.min.x -= margin
+        self.min.y -= margin
+        self.max.x += margin
+        self.max.y += margin
+
+    def size(self):
+        return self.max - self.min
+
+    def center(self):
+        return self.min + self.size()/2
+
+    def __str__(self):
+        return "BBOX([%g,%g,%g] - [%g,%g,%g])" % (self.min.x, self.min.y, self.max.x, self.max.y)
+
+# 3D bounding box.
+class BoundingBox3D(object):
+    def __init__(self):
+        self.min = Vector3(sys.float_info.max, sys.float_info.max, sys.float_info.max)
+        self.max = Vector3(-sys.float_info.max, -sys.float_info.max, -sys.float_info.max)
+
+    def addPoint(self, v):
+        self.min = self.min.min(v)
+        self.max = self.max.max(v)
 
     def addTriangle(self, triangle):
         for vertex in triangle.vertices:
-            self.addVertex(vertex)
+            self.addPoint(vertex)
 
     def addMargin(self, margin):
         self.min.x -= margin
@@ -232,100 +298,28 @@ class BoundingBox3D(object):
     def __str__(self):
         return "BBOX([%g,%g,%g] - [%g,%g,%g])" % (self.min.x, self.min.y, self.min.z, self.max.x, self.max.y, self.max.z)
 
-class Vertex2D(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __hash__(self):
-        return hash((self.x, self.y))
-
-    def __eq__(self, other):
-        return (self.x, self.y) == (other.x, other.y)
-
-    def __str__(self):
-        return "(%g,%g)" % (self.x, self.y)
-
-    def __repr__(self):
-        return str(self)
-
-    def __neg__(self):
-        return Vertex2D(-self.x, -self.y)
-
-    def __add__(self, other):
-        return Vertex2D(self.x + other.x, self.y + other.y)
-
-    def __sub__(self, other):
-        return Vertex2D(self.x - other.x, self.y - other.y)
-
-    def __mul__(self, other):
-        return Vertex2D(self.x*other, self.y*other)
-
-    def __div__(self, other):
-        return Vertex2D(self.x/other, self.y/other)
-
-    def dot(self, other):
-        return self.x*other.x + self.y*other.y
-
-    def length(self):
-        return math.sqrt(self.x**2 + self.y**2)
-
-    def normalized(self):
-        return self/self.length()
-
-    # Angle is in radians.
-    def rotated(self, angle):
-        return Vertex2D(self.x*math.cos(angle) - self.y*math.sin(angle),
-                      self.x*math.sin(angle) + self.y*math.cos(angle))
-
-    # Rotated 90 counter-clockwise.
-    def reciprocal(self):
-        return Vertex2D(-self.y, self.x)
-
-    # Returns angle in radians.
-    def angle(self):
-        return atan2(self.y, self.x)
-
-    def flipX(self):
-        return Vertex2D(-self.x, self.y)
-
-    def flipY(self):
-        return Vertex2D(self.x, -self.y)
-
-    def to_pair(self):
-        return self.x, self.y
-
-class Vertex3D(object):
-    def __init__(self, p):
-        self.p = p
-
-    def project(self, transform, angle):
-        # Rotate around Z axis.
-        rx = math.cos(angle)*self.p.x - math.sin(angle)*self.p.y
-        ry = math.sin(angle)*self.p.x + math.cos(angle)*self.p.y
-        rz = self.p.z
-
-        x, y = transform.transform(ry, rz)
-
-        return Vertex2D(x, y)
-
-    def translate(self, vector3):
-        return Vertex3D(self.p + vector3)
-
+# A 2-dimensional triangle.
 class Triangle2D(object):
+    # Vertices is a list of Vector2.
     def __init__(self, vertices):
         self.vertices = vertices
 
+# A 3-dimensional triangle.
 class Triangle3D(object):
+    # Vertices is a list of Vector3.
     def __init__(self, vertices):
         self.vertices = vertices
 
     def project(self, transform, angle):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
-    def translate(self, vector3):
-        return Triangle3D([v.translate(vector3) for v in self.vertices])
+    def __add__(self, vector3):
+        return Triangle3D([v + vector3 for v in self.vertices])
 
+    def __sub__(self, vector3):
+        return Triangle3D([v - vector3 for v in self.vertices])
+
+# Two 2D vertices representing an edge of the object0.
 class Edge(object):
     def __init__(self, v1, v2):
         self.v1 = v1
@@ -338,10 +332,12 @@ class Edge(object):
     def __eq__(self, other):
         return (self.v1, self.v2) == (other.v1, other.v2)
 
+# Return an image of the 3D triangles in an image of the width and height
+# specified.  The triangles are rotated by angle around the Z axis.
 def render(triangles, width, height, angle):
     print "Rendering at angle %g" % int(angle*180/math.pi)
 
-    bbox = BoundingBox()
+    bbox = BoundingBox2D()
 
     transform = Transform.makeIdentity()
 
@@ -352,7 +348,7 @@ def render(triangles, width, height, angle):
     # print "Model bounding box:", bbox
 
     # Pad so we don't run into the edge of the image.
-    bbox.addMargin(bbox.width()/20)
+    bbox.addMargin(bbox.size().x/20)
 
     transform = Transform.makeMap(bbox, width, height)
 
@@ -362,12 +358,13 @@ def render(triangles, width, height, angle):
 
     for triangle in triangles:
         triangle2d = triangle.project(transform, angle)
-        tbbox = BoundingBox()
+        tbbox = BoundingBox2D()
         tbbox.addTriangle(triangle2d)
         draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=RASTER_WHITE, outline=RASTER_WHITE)
 
     return img, transform
 
+# Return the height below the object where there are no on pixels.
 def get_base_height(image):
     width, height = image.size
 
@@ -379,6 +376,7 @@ def get_base_height(image):
 
     raise Exception("base not found")
 
+# Modify the image in-place to add a base to the bottom of it.
 def add_base(image):
     width, height = image.size
     base_height = get_base_height(image)
@@ -386,8 +384,6 @@ def add_base(image):
     for y in range(base_height):
         for x in range(width):
             image.putpixel((x, height - 1 - y), RASTER_WHITE)
-
-    return image
 
 def loadFile(filename):
     print "Loading model..."
@@ -403,10 +399,9 @@ def loadFile(filename):
 
         vertexOffset = len(vertices)
 
-        vertices.extend([Vertex3D(
-                Vector3(rawVertices[i*3 + 0], rawVertices[i*3 + 1], rawVertices[i*3 + 2])
-                ## Vector3(rawNormals[i*3 + 0], rawNormals[i*3 + 1], rawNormals[i*3 + 2])
-            ) for i in range(len(rawVertices)/3)])
+        vertices.extend([
+            Vector3(rawVertices[i*3 + 0], rawVertices[i*3 + 1], rawVertices[i*3 + 2])
+            for i in range(len(rawVertices)/3)])
 
         triangles.extend([Triangle3D([
             vertices[vertexOffset + face[0]],
@@ -415,10 +410,11 @@ def loadFile(filename):
 
     return triangles
 
+# Return "count" angles (in radians) going around the circle.
 def angles(count):
     return [angle*math.pi*2/count for angle in range(count)]
 
-# Return a list of paths of Vertex2D().
+# Return a list of paths of Vector2().
 def get_outlines(image):
     edges = []
 
@@ -432,9 +428,9 @@ def get_outlines(image):
             down = image.getpixel((x, y + 1))
 
             if this != right:
-                edges.append(Edge(Vertex2D(x + 1, y), Vertex2D(x + 1, y + 1)))
+                edges.append(Edge(Vector2(x + 1, y), Vector2(x + 1, y + 1)))
             if this != down:
-                edges.append(Edge(Vertex2D(x, y + 1), Vertex2D(x + 1, y + 1)))
+                edges.append(Edge(Vector2(x, y + 1), Vector2(x + 1, y + 1)))
     print "Made %d edges." % len(edges)
 
     # Put into a hash by the edges.
@@ -475,11 +471,14 @@ def get_outlines(image):
 
     return paths
 
-def shortest_distance_to_segment(v, v1, v2):
+# Given vectors v1 and v2 and point v, returns the distance from v to the line v1..v2.
+def distance_to_line(v, v1, v2):
     segment = v1 - v2
     n = segment.reciprocal().normalized()
     return math.fabs((v - v1).dot(n))
 
+# Given a list of vertices and a distance, returns a new list with vertices
+# removed if they add less than epsilon of detail.
 def simplify_vertices(vertices, epsilon):
     # http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
 
@@ -493,7 +492,7 @@ def simplify_vertices(vertices, epsilon):
         if vertices[first] == vertices[last]:
             dist = (vertices[i] - vertices[first]).length()
         else:
-            dist = shortest_distance_to_segment(vertices[i], vertices[first], vertices[last])
+            dist = distance_to_line(vertices[i], vertices[first], vertices[last])
         if dist > max_dist:
             index = i
             max_dist = dist
@@ -510,6 +509,7 @@ def simplify_vertices(vertices, epsilon):
         # None are far enough, just keep the ends.
         return [vertices[first], vertices[last]]
 
+# Return the vertices transformed by the transform.
 def transform_vertices(vertices, transform, scale):
     # Compute the inverse transform.
     transform = transform.invert()
@@ -552,7 +552,7 @@ def main():
     # Single image.
     if False:
         img, _ = render(triangles, 1024, 1024, 0)
-        img = add_base(img)
+        add_base(img)
         img.save("out.png")
 
     # Animated GIF.
@@ -580,7 +580,7 @@ def main():
         print "Center of bbox3d:", center
 
         # Move center to origin.
-        triangles = [triangle.translate(-center) for triangle in triangles]
+        triangles = [triangle - center for triangle in triangles]
 
         # Find scaling factor.
         size = bbox3d.size()
@@ -589,7 +589,7 @@ def main():
 
         for index, angle in enumerate(angles(ANGLE_COUNT)):
             image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
-            image = add_base(image)
+            add_base(image)
             paths = get_outlines(image)
             paths = [simplify_vertices(vertices, 1) for vertices in paths]
             paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
