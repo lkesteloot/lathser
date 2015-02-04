@@ -1,9 +1,6 @@
 
 To do next:
 
-    - Clean up code.
-    - Proper transform class.
-    - Handle non-closed paths properly.
     - Compensate for the kerf. That's a straight convolution at the raster pass
       with a flat circle. The diameter of the circle is that of the laser. The
       trick here is that I have to figure out the diameter in raster pixels by

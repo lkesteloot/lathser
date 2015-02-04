@@ -36,7 +36,7 @@ MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
 # Number of cuts.
-ANGLE_COUNT = 16
+ANGLE_COUNT = 1
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -421,8 +421,8 @@ def get_outlines(image):
     # Generate edges for each pixel.
     print "Generating edges..."
     width, height = image.size
-    for x in range(width - 1):
-        for y in range(height - 1):
+    for y in range(height - 1):
+        for x in range(width - 1):
             this = image.getpixel((x, y))
             right = image.getpixel((x + 1, y))
             down = image.getpixel((x, y + 1))
@@ -456,16 +456,27 @@ def get_outlines(image):
         if not connected_edges:
             edges = [edge for edge in edges if not edge.used]
             if not edges:
+                # No more vertices to add.
                 break
+            # Done on this end. See if we can continue on the other end, in case
+            # it's not a closed path.
+            vertices.reverse()
+            vertex = vertices[-1]
+            connected_edges = [edge for edge in edgemap[vertex] if not edge.used]
+        if not connected_edges:
+            # Start new path.
             vertices = []
             paths.append(vertices)
             edge = edges[0]
-        else:
-            edge = connected_edges[0]
-        if edge.v1 == vertex:
+            vertices.append(edge.v1)
             vertex = edge.v2
         else:
-            vertex = edge.v1
+            # Extend current path.
+            edge = connected_edges[0]
+            if edge.v1 == vertex:
+                vertex = edge.v2
+            else:
+                vertex = edge.v1
     edges = [edge for edge in edges if not edge.used]
     print "Sequence has %d vertices, with %d edges unused." % (len(vertices), len(edges))
 
@@ -543,7 +554,7 @@ def generate_svg(filename, paths):
 
 def main():
     filename = "data/LargeKnight.json"
-    # filename = "data/My_Scan_1.json"
+    filename = "data/My_Scan_1.json"
     filename = "data/knight.json"
 
     triangles = loadFile(filename)
