@@ -53,6 +53,8 @@ FINAL_Y = 1
 # but low-res, 5 is slower but high-res.
 RENDER_SCALE = 5
 
+PASS_SHADES = [80, 60, 40, 20, 0]
+
 # Size of the laser bed.
 DPI = 72
 SVG_WIDTH = 32*DPI
@@ -385,6 +387,15 @@ def add_base(image):
         for x in range(width):
             image.putpixel((x, height - 1 - y), RASTER_WHITE)
 
+def add_shade(image, shade_percent):
+    width, height = image.size
+    shade_width = width*shade_percent/100
+    start_x = (width - shade_width)/2
+
+    for y in range(height):
+        for x in range(shade_width):
+            image.putpixel((start_x + x, y), RASTER_WHITE)
+
 def loadFile(filename):
     print "Loading model..."
     data = json.load(open(filename))
@@ -598,13 +609,19 @@ def main():
         max_size = max(size.x, size.y)
         scale = MODEL_DIAMETER / max_size * DPI
 
-        for index, angle in enumerate(angles(ANGLE_COUNT)):
-            image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
-            add_base(image)
-            paths = get_outlines(image)
-            paths = [simplify_vertices(vertices, 1) for vertices in paths]
-            paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
-            generate_svg("out%02d.svg" % index, paths)
+        index = 0
+        for pass_number, shade_percent in enumerate(PASS_SHADES):
+            print "Making pass %d (%d%%)" % (pass_number, shade_percent)
+
+            for angle in angles(ANGLE_COUNT):
+                image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
+                add_base(image)
+                add_shade(image, shade_percent)
+                paths = get_outlines(image)
+                paths = [simplify_vertices(vertices, 1) for vertices in paths]
+                paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
+                generate_svg("out%02d.svg" % index, paths)
+                index += 1
 
 if __name__ == "__main__":
     main()
