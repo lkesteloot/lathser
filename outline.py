@@ -53,7 +53,13 @@ FINAL_Y = 1
 # but low-res, 5 is slower but high-res.
 RENDER_SCALE = 5
 
+# The various passes we want to make to spiral into the center, in
+# percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 60, 40, 20, 0]
+PASS_SHADES = [0]
+
+# The radius of the kerf, in inches.
+KERF_RADIUS_IN = 0.002
 
 # Size of the laser bed.
 DPI = 72
@@ -396,6 +402,22 @@ def add_shade(image, shade_percent):
         for x in range(shade_width):
             image.putpixel((start_x + x, y), RASTER_WHITE)
 
+# Extend the shape in the image by the radius and return the new image.
+def add_kerf(image, radius):
+    print "Adding kerf of radius %.2f" % radius
+
+    width, height = image.size
+    new_image = Image.new(RASTER_MODE, (width, height))
+    draw = ImageDraw.Draw(new_image)
+
+    for y in range(height):
+        for x in range(width):
+            p = image.getpixel((x, y))
+            if p == RASTER_WHITE:
+                draw.arc([x - radius, y - radius, x + radius, y + radius], 0, 360, RASTER_WHITE)
+
+    return new_image
+
 def loadFile(filename):
     print "Loading model..."
     data = json.load(open(filename))
@@ -531,7 +553,7 @@ def simplify_vertices(vertices, epsilon):
         # None are far enough, just keep the ends.
         return [vertices[first], vertices[last]]
 
-# Return the vertices transformed by the transform.
+# Return the vertices transformed by the inverse of the transform.
 def transform_vertices(vertices, transform, scale):
     # Compute the inverse transform.
     transform = transform.invert()
@@ -617,6 +639,8 @@ def main():
                 image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
                 add_base(image)
                 add_shade(image, shade_percent)
+                kerf_radius = KERF_RADIUS_IN*transform.scale/scale*DPI
+                image = add_kerf(image, kerf_radius)
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
