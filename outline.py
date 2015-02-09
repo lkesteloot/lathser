@@ -36,7 +36,7 @@ MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
 # Number of cuts.
-ANGLE_COUNT = 16
+ANGLE_COUNT = 1
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -57,10 +57,16 @@ IMAGE_SIZE = 256
 ## RENDER_SCALE = 5
 RENDER_SCALE = 1
 
+# Whether to generate a single file (True) or individual files (False).
+GENERATE_SINGLE_FILE = False
+
+# Whether to generate a lit version of the raster.
+GENERATE_LIT_VERSION = True
+
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 60, 40, 20, 0]
-PASS_SHADES = [80]
+PASS_SHADES = [0]
 
 # The radius of the kerf, in inches.
 KERF_RADIUS_IN = 0.002
@@ -180,6 +186,12 @@ class Vector3(object):
 
     def normalized(self):
         return self/self.length()
+
+    # Right-handed cross product.
+    def cross(self, other):
+        a = self
+        b = other
+        return Vector3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x)
 
     # Component-wise min.
     def min(self, other):
@@ -322,6 +334,11 @@ class Triangle3D(object):
     def __init__(self, vertices):
         self.vertices = vertices
 
+        # Compute normal.
+        v1 = vertices[0] - vertices[2]
+        v2 = vertices[0] - vertices[1]
+        self.normal = v1.cross(v2).normalized()
+
     def project(self, transform, angle):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
@@ -346,7 +363,7 @@ class Edge(object):
 
 # Return an image of the 3D triangles in an image of the width and height
 # specified.  The triangles are rotated by angle around the Z axis.
-def render(triangles, width, height, angle):
+def render(triangles, width, height, angle, light):
     print "Rendering at angle %g" % int(angle*180/math.pi)
 
     bbox = BoundingBox2D()
@@ -370,9 +387,23 @@ def render(triangles, width, height, angle):
 
     for triangle in triangles:
         triangle2d = triangle.project(transform, angle)
-        tbbox = BoundingBox2D()
-        tbbox.addTriangle(triangle2d)
-        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=RASTER_WHITE, outline=RASTER_WHITE)
+
+        if light:
+            # Remove backfacing triangles.
+            if triangle.normal.x > 0:
+                continue
+
+            # Compute diffuse component of lighting.
+            diffuse = triangle.normal.dot(light)
+            if diffuse < 0:
+                diffuse = 0
+
+            # Convert to pixel value.
+            color = int(diffuse*255 + 0.5)
+        else:
+            color = RASTER_WHITE
+
+        draw.polygon([(v.x, v.y) for v in triangle2d.vertices], fill=color, outline=color)
 
     return img, transform
 
@@ -629,7 +660,6 @@ def main():
             bbox3d.addTriangle(triangle)
 
         center = bbox3d.center()
-        print "Center of bbox3d:", center
 
         # Move center to origin.
         triangles = [triangle - center for triangle in triangles]
@@ -639,6 +669,9 @@ def main():
         max_size = max(size.x, size.y)
         scale = MODEL_DIAMETER / max_size * DPI
 
+        # Light vector (to light).
+        light = Vector3(-1, 1, 1).normalized()
+
         passes = []
 
         index = 0
@@ -646,7 +679,10 @@ def main():
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
             for angle in angles(ANGLE_COUNT):
-                image, transform = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle)
+                if GENERATE_LIT_VERSION:
+                    image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
+                    image.save("out%02d.png" % index)
+                image, transform = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, None)
                 add_base(image)
                 shade_width = int(ROD_DIAMETER*shade_percent/100.0*transform.scale/scale*DPI)
                 # XXX this shade moves around; our math is wrong.
@@ -656,12 +692,16 @@ def main():
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
-                passes.extend(paths)
-                passes.extend(make_separator())
+                if GENERATE_SINGLE_FILE:
+                    passes.extend(paths)
+                    passes.extend(make_separator())
+                else:
+                    generate_svg("out%02d.svg" % index, paths)
                 index += 1
                 print
 
-        generate_svg("out.svg", passes)
+        if not GENERATE_SINGLE_FILE:
+            generate_svg("out.svg", passes)
 
 if __name__ == "__main__":
     main()
