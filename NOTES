@@ -1,10 +1,6 @@
 
 To do next:
 
-    - Compensate for the kerf. That's a straight convolution at the raster pass
-      with a flat circle. The diameter of the circle is that of the laser. The
-      trick here is that I have to figure out the diameter in raster pixels by
-      inverting the later transformation.
     - Add cut lines to let smaller pieces fall off. Not sure how to do this.
       Could try doing it at the raster layer (by drawing radial lines to the
       edges) but that might leave artifacts on the edge of the piece.

@@ -36,7 +36,7 @@ MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
 # Number of cuts.
-ANGLE_COUNT = 1
+ANGLE_COUNT = 16
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -49,14 +49,18 @@ TARGET = TARGET_VIEW
 FINAL_X = 1.25 - 0.045
 FINAL_Y = 1
 
+# Base raster image size. Scaled by RENDER_SCALE.
+IMAGE_SIZE = 256
+
 # Number of times to scale up the rendering. 1 will be fast
 # but low-res, 5 is slower but high-res.
-RENDER_SCALE = 5
+## RENDER_SCALE = 5
+RENDER_SCALE = 1
 
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 60, 40, 20, 0]
-PASS_SHADES = [0]
+PASS_SHADES = [80]
 
 # The radius of the kerf, in inches.
 KERF_RADIUS_IN = 0.002
@@ -393,9 +397,8 @@ def add_base(image):
         for x in range(width):
             image.putpixel((x, height - 1 - y), RASTER_WHITE)
 
-def add_shade(image, shade_percent):
+def add_shade(image, shade_width):
     width, height = image.size
-    shade_width = width*shade_percent/100
     start_x = (width - shade_width)/2
 
     for y in range(height):
@@ -566,6 +569,11 @@ def transform_vertices(vertices, transform, scale):
 
     return [transform.transformVertex2D(v) for v in vertices]
 
+# Make the laser jog all the way to the right of the bed so that we know to
+# manually advance the rotation of the rod.
+def make_separator():
+    return [[Vector2(SVG_WIDTH - DPI, DPI), Vector2(SVG_WIDTH - DPI - DPI/4, DPI)]]
+
 def generate_svg(filename, paths):
     out = open(filename, "w")
     out.write("""<?xml version="1.0" encoding="utf-8"?>
@@ -601,7 +609,7 @@ def main():
 
     # Animated GIF.
     if False:
-        images = [render(triangles, 256, 256, angle)[0] for angle in angles(ANGLE_COUNT)]
+        images = [render(triangles, IMAGE_SIZE, IMAGE_SIZE, angle)[0] for angle in angles(ANGLE_COUNT)]
 
         fp = open("out.gif", "wb")
         gifmaker.makedelta(fp, images)
@@ -609,7 +617,7 @@ def main():
 
     # Single SVG.
     if False:
-        image, _ = render(triangles, 256*5, 256*5, 0)
+        image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, 0)
         paths = get_outlines(image)
         paths = [simplify_vertices(vertices, 1) for vertices in paths]
         generate_svg("out.svg", paths)
@@ -631,21 +639,29 @@ def main():
         max_size = max(size.x, size.y)
         scale = MODEL_DIAMETER / max_size * DPI
 
+        passes = []
+
         index = 0
         for pass_number, shade_percent in enumerate(PASS_SHADES):
-            print "Making pass %d (%d%%)" % (pass_number, shade_percent)
+            print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
             for angle in angles(ANGLE_COUNT):
-                image, transform = render(triangles, 256*RENDER_SCALE, 256*RENDER_SCALE, angle)
+                image, transform = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle)
                 add_base(image)
-                add_shade(image, shade_percent)
+                shade_width = int(ROD_DIAMETER*shade_percent/100.0*transform.scale/scale*DPI)
+                # XXX this shade moves around; our math is wrong.
+                add_shade(image, shade_width)
                 kerf_radius = KERF_RADIUS_IN*transform.scale/scale*DPI
                 image = add_kerf(image, kerf_radius)
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
-                generate_svg("out%02d.svg" % index, paths)
+                passes.extend(paths)
+                passes.extend(make_separator())
                 index += 1
+                print
+
+        generate_svg("out.svg", passes)
 
 if __name__ == "__main__":
     main()
