@@ -1,6 +1,7 @@
 
 To do next:
-
+    - When lighting, sort back-to-front (painter's algorithm).
+    - When lighting, rotate normal.
     - Add cut lines to let smaller pieces fall off. Not sure how to do this.
       Could try doing it at the raster layer (by drawing radial lines to the
       edges) but that might leave artifacts on the edge of the piece.

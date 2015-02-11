@@ -29,14 +29,14 @@ import gifmaker
 RASTER_MODE = "L"
 RASTER_WHITE = 255
 
-# Diameter in inches.
+# Diameter of rod in inches.
 ROD_DIAMETER = 0.8
 # Total margin within rod as a fraction of the diameter.
 MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
-# Number of cuts.
-ANGLE_COUNT = 1
+# Number of cuts around the circle.
+ANGLE_COUNT = 16
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -54,34 +54,37 @@ IMAGE_SIZE = 256
 
 # Number of times to scale up the rendering. 1 will be fast
 # but low-res, 5 is slower but high-res.
-## RENDER_SCALE = 5
 RENDER_SCALE = 1
 
 # Whether to generate a single file (True) or individual files (False).
-GENERATE_SINGLE_FILE = False
+GENERATE_SINGLE_FILE = True
 
-# Whether to generate a lit version of the raster.
-GENERATE_LIT_VERSION = True
+# Whether to also generate a lit version of the raster.
+GENERATE_LIT_VERSION = False
 
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 60, 40, 20, 0]
-PASS_SHADES = [0]
+PASS_SHADES = [60]
 
-# The radius of the kerf, in inches.
+# The radius of the laser kerf, in inches.
 KERF_RADIUS_IN = 0.002
 
-# Size of the laser bed.
+# Dots per inch in the SVG file. Don't change this.
 DPI = 72
+
+# Size of the laser bed, in dots.
 SVG_WIDTH = 32*DPI
 SVG_HEIGHT = 20*DPI
 
+# Stroke widths and colors.
 if TARGET == TARGET_CUT:
     # "Hairline" in AI.
     STROKE_WIDTH = 0.001
     FOREGROUND_COLOR = "black"
     BACKGROUND_COLOR = "white"
 else:
+    # Width of 1 so we can see it.
     STROKE_WIDTH = 1
     FOREGROUND_COLOR = "white"
     BACKGROUND_COLOR = "black"
@@ -201,6 +204,8 @@ class Vector3(object):
     def max(self, other):
         return Vector3(max(self.x, other.x), max(self.y, other.y), max(self.z, other.z))
 
+    # Rotate the 3D vector around the Z axis by "angle", then project on the X
+    # plane.
     def project(self, transform, angle):
         # Rotate around Z axis.
         rx = math.cos(angle)*self.x - math.sin(angle)*self.y
@@ -211,7 +216,7 @@ class Vector3(object):
 
         return Vector2(x, y)
 
-# Represents a 2D transformation.
+# Represents a 2D transformation (scale and translation).
 class Transform(object):
     # The transform takes model coordinate (x,y) and computes (x*scale + offx,
     # y*scale+offy).
@@ -223,13 +228,16 @@ class Transform(object):
     def __str__(self):
         return "Trans[%g,(%g,%g)]" % (self.scale, self.offx, self.offy)
 
+    # Transform a coordinate to its new location.
     def transform(self, x, y):
         return x*self.scale + self.offx, y*self.scale + self.offy
 
-    def transformVertex2D(self, v):
+    # Transform a Vector2 to another Vector2.
+    def transformVector2(self, v):
         x, y = self.transform(v.x, v.y)
         return Vector2(x, y)
 
+    # Create a new transformation that's the inverse of this one.
     def invert(self):
         # x' = x*scale + offx
         # x' - offx = x*scale
@@ -237,12 +245,15 @@ class Transform(object):
         # x = x'/scale - offx/scale
         return Transform(1.0/self.scale, -self.offx/self.scale, -self.offy/self.scale)
 
+    # Create a new transformation that's scaled.
     def scaled(self, scale):
         return Transform(self.scale*scale, self.offx*scale, self.offy*scale)
 
+    # Create a new transformation that's translated.
     def translated(self, dx, dy):
         return Transform(self.scale, self.offx + dx, self.offy + dy)
 
+    # Create a transformation that maps from the bbox to the width and height.
     @staticmethod
     def makeMap(bbox, width, height):
         size = bbox.size()
@@ -258,6 +269,7 @@ class Transform(object):
 
         return Transform(scale, offset.x, offset.y)
 
+    # Create a no-op transformation.
     @staticmethod
     def makeIdentity():
         return Transform(1, 0, 0)
@@ -339,30 +351,39 @@ class Triangle3D(object):
         v2 = vertices[0] - vertices[1]
         self.normal = v1.cross(v2).normalized()
 
+    # Rotate this 3D triangle by angle, transform it, project it onto 2D, and return
+    # a 2D triangle.
     def project(self, transform, angle):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
+    # Translate this triangle by the vector.
     def __add__(self, vector3):
         return Triangle3D([v + vector3 for v in self.vertices])
 
+    # Translate this triangle by the negative of the vector.
     def __sub__(self, vector3):
         return Triangle3D([v - vector3 for v in self.vertices])
 
-# Two 2D vertices representing an edge of the object0.
+# Two 2D vectors representing an edge of the object.
 class Edge(object):
     def __init__(self, v1, v2):
         self.v1 = v1
         self.v2 = v2
+
+        # Flag for whether we've used this edge in the path-building algorithm.
         self.used = False
 
     def __hash__(self):
+        # Don't hash "used", that's not part of the value.
         return hash((self.v1, self.v2))
 
     def __eq__(self, other):
         return (self.v1, self.v2) == (other.v1, other.v2)
 
 # Return an image of the 3D triangles in an image of the width and height
-# specified.  The triangles are rotated by angle around the Z axis.
+# specified.  The triangles are rotated by angle around the Z axis. If
+# the "light" 3D vector is not None, the triangles are lit by a light
+# pointed to by that vector.
 def render(triangles, width, height, angle, light):
     print "Rendering at angle %g" % int(angle*180/math.pi)
 
@@ -374,17 +395,17 @@ def render(triangles, width, height, angle, light):
         triangle2d = triangle.project(transform, angle)
         bbox.addTriangle(triangle2d)
 
-    # print "Model bounding box:", bbox
-
     # Pad so we don't run into the edge of the image.
     bbox.addMargin(bbox.size().x/20)
 
+    # Map from object bounding box to raster size.
     transform = Transform.makeMap(bbox, width, height)
 
-    # Render.
+    # Create image.
     img = Image.new(RASTER_MODE, (width, height))
     draw = ImageDraw.Draw(img)
 
+    # Draw the triangles.
     for triangle in triangles:
         triangle2d = triangle.project(transform, angle)
 
@@ -428,9 +449,12 @@ def add_base(image):
         for x in range(width):
             image.putpixel((x, height - 1 - y), RASTER_WHITE)
 
-def add_shade(image, shade_width):
+# Draw a rectangle of width "shade_width" down the middle of the image
+# so we can spiral into the rod.
+def add_shade(image, shade_width, shade_center_x):
+    print "Add shade", shade_width, shade_center_x
     width, height = image.size
-    start_x = (width - shade_width)/2
+    start_x = shade_center_x - shade_width/2
 
     for y in range(height):
         for x in range(shade_width):
@@ -452,6 +476,7 @@ def add_kerf(image, radius):
 
     return new_image
 
+# Return a list of 3D triangles.
 def loadFile(filename):
     print "Loading model..."
     data = json.load(open(filename))
@@ -481,7 +506,7 @@ def loadFile(filename):
 def angles(count):
     return [angle*math.pi*2/count for angle in range(count)]
 
-# Return a list of paths of Vector2().
+# Return a list of paths of Vector2() for this image.
 def get_outlines(image):
     edges = []
 
@@ -549,7 +574,7 @@ def get_outlines(image):
 
     return paths
 
-# Given vectors v1 and v2 and point v, returns the distance from v to the line v1..v2.
+# Given points v1 and v2 and point v, returns the distance from v to the line v1,v2.
 def distance_to_line(v, v1, v2):
     segment = v1 - v2
     n = segment.reciprocal().normalized()
@@ -598,7 +623,7 @@ def transform_vertices(vertices, transform, scale):
     # Move to right position.
     transform = transform.translated(FINAL_X*DPI, FINAL_Y*DPI)
 
-    return [transform.transformVertex2D(v) for v in vertices]
+    return [transform.transformVector2(v) for v in vertices]
 
 # Make the laser jog all the way to the right of the bed so that we know to
 # manually advance the rotation of the rod.
@@ -625,8 +650,6 @@ def generate_svg(filename, paths):
     print "Generated \"%s\"." % filename
 
 def main():
-    filename = "data/LargeKnight.json"
-    filename = "data/My_Scan_1.json"
     filename = "data/knight.json"
 
     triangles = loadFile(filename)
@@ -684,11 +707,18 @@ def main():
                     image.save("out%02d.png" % index)
                 image, transform = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, None)
                 add_base(image)
+
+                # Add the shade (for spiraling). The "transform" converts from
+                # model units to raster coordinates. "scale" converts from
+                # model units to dots. DPI converts from inches to dots.
                 shade_width = int(ROD_DIAMETER*shade_percent/100.0*transform.scale/scale*DPI)
-                # XXX this shade moves around; our math is wrong.
-                add_shade(image, shade_width)
+                shade_center_x = int(transform.offx)
+                add_shade(image, shade_width, shade_center_x)
+
+                # Expand to take into account the kerf.
                 kerf_radius = KERF_RADIUS_IN*transform.scale/scale*DPI
                 image = add_kerf(image, kerf_radius)
+
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
@@ -700,7 +730,7 @@ def main():
                 index += 1
                 print
 
-        if not GENERATE_SINGLE_FILE:
+        if GENERATE_SINGLE_FILE:
             generate_svg("out.svg", passes)
 
 if __name__ == "__main__":
