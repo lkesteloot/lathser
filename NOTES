@@ -1,5 +1,7 @@
 
 To do next:
+    - Increase kerf to get better ears.
+    - Try output from ctrl-cut.
     - When lighting, sort back-to-front (painter's algorithm).
     - When lighting, rotate normal.
     - Add cut lines to let smaller pieces fall off. Not sure how to do this.

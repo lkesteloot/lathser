@@ -55,7 +55,7 @@ IMAGE_SIZE = 256
 
 # Number of times to scale up the rendering. 1 will be fast
 # but low-res, 5 is slower but high-res.
-RENDER_SCALE = 1
+RENDER_SCALE = 2
 
 # Whether to generate a single file (True) or individual files (False).
 GENERATE_SINGLE_FILE = True
@@ -403,7 +403,7 @@ def render(triangles, width, height, angle, light):
         bbox.addTriangle(triangle2d)
 
     # Pad so we don't run into the edge of the image.
-    bbox.addMargin(bbox.size().x/20)
+    bbox.addMargin(bbox.size().x/10)
 
     # Map from object bounding box to raster size.
     transform = Transform.makeMap(bbox, width, height)
