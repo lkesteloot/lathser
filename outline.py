@@ -27,6 +27,7 @@ import gifmaker
 
 # What kind of image to make. Use "L" for GIF compatibility.
 RASTER_MODE = "L"
+RASTER_BLACK = 0
 RASTER_WHITE = 255
 
 # Diameter of rod in inches.
@@ -59,16 +60,22 @@ RENDER_SCALE = 1
 # Whether to generate a single file (True) or individual files (False).
 GENERATE_SINGLE_FILE = True
 
+# If generating a single file, whether to generate a single path.
+GENERATE_SINGLE_PATH = True
+
 # Whether to also generate a lit version of the raster.
 GENERATE_LIT_VERSION = False
 
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
-PASS_SHADES = [80, 60, 40, 20, 0]
-PASS_SHADES = [60]
+PASS_SHADES = [80, 40, 0]
+# PASS_SHADES = [60]
 
 # The radius of the laser kerf, in inches.
 KERF_RADIUS_IN = 0.002
+
+# Extra spacing for rough cuts, in inches.
+ROUGH_EXTRA_IN = 1/8.0
 
 # Dots per inch in the SVG file. Don't change this.
 DPI = 72
@@ -452,13 +459,22 @@ def add_base(image):
 # Draw a rectangle of width "shade_width" down the middle of the image
 # so we can spiral into the rod.
 def add_shade(image, shade_width, shade_center_x):
-    print "Add shade", shade_width, shade_center_x
     width, height = image.size
     start_x = shade_center_x - shade_width/2
 
-    for y in range(height):
+    # Start at 2 so that the path can trace it. For some reason 1
+    # does not work.
+    for y in range(2, height):
         for x in range(shade_width):
             image.putpixel((start_x + x, y), RASTER_WHITE)
+
+# Clear the top "size" pixels of the image.
+def clear_top(image, size):
+    width, height = image.size
+
+    for y in range(0, size):
+        for x in range(width):
+            image.putpixel((x, y), RASTER_BLACK)
 
 # Extend the shape in the image by the radius and return the new image.
 def add_kerf(image, radius):
@@ -505,6 +521,10 @@ def loadFile(filename):
 # Return "count" angles (in radians) going around the circle.
 def angles(count):
     return [angle*math.pi*2/count for angle in range(count)]
+
+# Return the first half of the list.
+def half_list(lst):
+    return lst[:len(lst)/2]
 
 # Return a list of paths of Vector2() for this image.
 def get_outlines(image):
@@ -639,9 +659,9 @@ def generate_svg(filename, paths):
 ]>
 <svg xmlns="&ns_svg;" width="%d" height="%d" overflow="visible" style="background: %s">
 """ % (SVG_WIDTH, SVG_HEIGHT, BACKGROUND_COLOR))
-    for vertices in paths:
+    for path in paths:
         out.write("""<polyline fill="none" stroke="%s" stroke-width="%g" points=" """ % (FOREGROUND_COLOR, STROKE_WIDTH))
-        for vertex in vertices:
+        for vertex in path:
             out.write(" %g,%g" % (vertex.x, vertex.y))
         out.write(""" "/>\n""")
     out.write("""</svg>
@@ -695,13 +715,13 @@ def main():
         # Light vector (to light).
         light = Vector3(-1, 1, 1).normalized()
 
-        passes = []
+        all_paths = []
 
         index = 0
         for pass_number, shade_percent in enumerate(PASS_SHADES):
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
-            for angle in angles(ANGLE_COUNT):
+            for angle in half_list(angles(ANGLE_COUNT)):
                 if GENERATE_LIT_VERSION:
                     image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
                     image.save("out%02d.png" % index)
@@ -717,21 +737,68 @@ def main():
 
                 # Expand to take into account the kerf.
                 kerf_radius = KERF_RADIUS_IN*transform.scale/scale*DPI
+                if shade_percent != 0:
+                    # Rough cut, add some spacing so we don't char the wood.
+                    kerf_radius += ROUGH_EXTRA_IN*transform.scale/scale*DPI
                 image = add_kerf(image, kerf_radius)
+
+                if GENERATE_SINGLE_PATH:
+                    # Make sure the top is clear so that we don't split the path.
+                    clear_top(image, 2)
 
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
                 if GENERATE_SINGLE_FILE:
-                    passes.extend(paths)
-                    passes.extend(make_separator())
+                    if GENERATE_SINGLE_PATH:
+                        # Assume no holes, append only first path. We could instead append
+                        # the path that has the longest total distance.
+                        if paths:
+                            # Find the longest path (most number of vertices).
+                            path = max(paths, key=lambda path: len(path))
+                            all_paths.append(path)
+                    else:
+                        all_paths.extend(paths)
+                        all_paths.extend(make_separator())
                 else:
                     generate_svg("out%02d.svg" % index, paths)
                 index += 1
                 print
 
         if GENERATE_SINGLE_FILE:
-            generate_svg("out.svg", passes)
+            if GENERATE_SINGLE_PATH:
+                # Find the top-most Y coordinate.
+                top_y = sys.float_info.max
+                for path in all_paths:
+                    for vertex in path:
+                        top_y = min(top_y, vertex.y)
+
+                # Make some room.
+                top_y -= DPI/8.0
+
+                # Blend all paths into one.
+                single_path = []
+                for path in all_paths:
+                    # Make sure all paths go left to right.
+                    if path[0].x > path[-1].x:
+                        path.reverse()
+
+                    if single_path:
+                        previous_vertex = single_path[-1]
+                        next_vertex = path[0]
+
+                        # Make return around the object. We must go from previous_vertex
+                        # to next_vertex without touching the object. We do this by
+                        # returning to a low Y value.
+                        single_path.append(Vector2(previous_vertex.x, top_y))
+                        single_path.append(Vector2(next_vertex.x, top_y))
+
+                    single_path.extend(path)
+
+                all_paths = [single_path]
+                print "The single path has %d vertices." % len(single_path)
+
+            generate_svg("out.svg", all_paths)
 
 if __name__ == "__main__":
     main()
