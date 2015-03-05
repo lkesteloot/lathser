@@ -2,3 +2,5 @@
 *.gif
 *.svg
 /data
+*.vector
+*.prn

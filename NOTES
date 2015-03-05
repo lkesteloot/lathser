@@ -1,7 +1,9 @@
 
 To do next:
+    - Write simulator of cuts as a web page.
     - Increase kerf to get better ears.
     - Try output from ctrl-cut.
+        - http://timgolden.me.uk/python/win32_how_do_i/print.html#win32print
     - When lighting, sort back-to-front (painter's algorithm).
     - When lighting, rotate normal.
     - Add cut lines to let smaller pieces fall off. Not sure how to do this.

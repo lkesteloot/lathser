@@ -61,7 +61,7 @@ RENDER_SCALE = 2
 GENERATE_SINGLE_FILE = True
 
 # If generating a single file, whether to generate a single path.
-GENERATE_SINGLE_PATH = True
+GENERATE_SINGLE_PATH = False
 
 # Whether to also generate a lit version of the raster.
 GENERATE_LIT_VERSION = False
@@ -69,7 +69,7 @@ GENERATE_LIT_VERSION = False
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 40, 0]
-# PASS_SHADES = [60]
+PASS_SHADES = [0]
 
 # The radius of the laser kerf, in inches.
 KERF_RADIUS_IN = 0.002
@@ -83,6 +83,13 @@ DPI = 72
 # Size of the laser bed, in dots.
 SVG_WIDTH = 32*DPI
 SVG_HEIGHT = 20*DPI
+
+# Output file type.
+OUTPUT_EXTENSION = "svg"
+OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
+
+# We can only output integers, so we translate to a much higher DPI.
+VECTOR_DPI = 1200
 
 # Stroke widths and colors.
 if TARGET == TARGET_CUT:
@@ -650,8 +657,7 @@ def transform_vertices(vertices, transform, scale):
 def make_separator():
     return [[Vector2(SVG_WIDTH - DPI, DPI), Vector2(SVG_WIDTH - DPI - DPI/4, DPI)]]
 
-def generate_svg(filename, paths):
-    out = open(filename, "w")
+def generate_svg(out, paths):
     out.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
 "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
@@ -666,7 +672,28 @@ def generate_svg(filename, paths):
         out.write(""" "/>\n""")
     out.write("""</svg>
 """)
+
+def generate_vector(out, paths):
+    for path in paths:
+        for index, vertex in enumerate(path):
+            command = "M" if index == 0 else "L"
+            x = int(vertex.x*VECTOR_DPI/DPI)
+            y = int(vertex.y*VECTOR_DPI/DPI)
+            out.write("%s%d,%d\n" % (command, x, y))
+    out.write("X\n")
+
+def generate_file(filename, paths):
+    filename += "." + OUTPUT_EXTENSION
+
+    out = open(filename, "w")
+    if OUTPUT_EXTENSION == "svg":
+        generate_svg(out, paths)
+    elif OUTPUT_EXTENSION == "vector":
+        generate_vector(out, paths)
+    else:
+        raise Exception("Unknown extension " + OUTPUT_EXTENSION)
     out.close()
+
     print "Generated \"%s\"." % filename
 
 def main():
@@ -694,7 +721,7 @@ def main():
         image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, 0)
         paths = get_outlines(image)
         paths = [simplify_vertices(vertices, 1) for vertices in paths]
-        generate_svg("out.svg", paths)
+        generate_file("out", paths)
 
     # All SVGs.
     if True:
@@ -761,7 +788,7 @@ def main():
                         all_paths.extend(paths)
                         all_paths.extend(make_separator())
                 else:
-                    generate_svg("out%02d.svg" % index, paths)
+                    generate_file("out%02d" % index, paths)
                 index += 1
                 print
 
@@ -798,7 +825,7 @@ def main():
                 all_paths = [single_path]
                 print "The single path has %d vertices." % len(single_path)
 
-            generate_svg("out.svg", all_paths)
+            generate_file("out", all_paths)
 
 if __name__ == "__main__":
     main()
