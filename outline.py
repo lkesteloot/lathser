@@ -25,6 +25,10 @@ from PIL.GifImagePlugin import getheader, getdata
 # https://raw.githubusercontent.com/python-pillow/Pillow/master/Scripts/gifmaker.py
 import gifmaker
 
+from document import Document
+from cut import Cut
+import epilog
+
 # What kind of image to make. Use "L" for GIF compatibility.
 RASTER_MODE = "L"
 RASTER_BLACK = 0
@@ -37,7 +41,7 @@ MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
 # Number of cuts around the circle.
-ANGLE_COUNT = 16
+ANGLE_COUNT = 2
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -87,6 +91,7 @@ SVG_HEIGHT = 20*DPI
 # Output file type.
 OUTPUT_EXTENSION = "svg"
 OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
+OUTPUT_EXTENSION = "prn"     # For direct printing
 
 # We can only output integers, so we translate to a much higher DPI.
 VECTOR_DPI = 1200
@@ -682,14 +687,27 @@ def generate_vector(out, paths):
             out.write("%s%d,%d\n" % (command, x, y))
     out.write("X\n")
 
-def generate_file(filename, paths):
-    filename += "." + OUTPUT_EXTENSION
+def generate_prn(out, paths, title):
+    doc = Document(title)
+    dpi = doc.getResolution()
+    for path in paths:
+        cut = Cut(9, 90, 5000)
+        # Convert to doc's resolution.
+        cut.points = [Vector2(p.x*dpi/DPI, p.y*dpi/DPI) for p in path]
+        doc.addCut(cut)
+
+    epilog.generate_prn(out, doc)
+
+def generate_file(basename, paths):
+    filename = basename + "." + OUTPUT_EXTENSION
 
     out = open(filename, "w")
     if OUTPUT_EXTENSION == "svg":
         generate_svg(out, paths)
     elif OUTPUT_EXTENSION == "vector":
         generate_vector(out, paths)
+    elif OUTPUT_EXTENSION == "prn":
+        generate_prn(out, paths, basename)
     else:
         raise Exception("Unknown extension " + OUTPUT_EXTENSION)
     out.close()
