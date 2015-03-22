@@ -1,0 +1,623 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		453CA2C318FD738A009068AB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 453CA2C218FD738A009068AB /* QuartzCore.framework */; };
+		45910B7C18FB3D260059CFF9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7B18FB3D260059CFF9 /* Foundation.framework */; };
+		45910B7E18FB3D260059CFF9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7D18FB3D260059CFF9 /* CoreGraphics.framework */; };
+		45910B8018FB3D260059CFF9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7F18FB3D260059CFF9 /* UIKit.framework */; };
+		45910B8618FB3D260059CFF9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 45910B8418FB3D260059CFF9 /* InfoPlist.strings */; };
+		45910B8818FB3D260059CFF9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910B8718FB3D260059CFF9 /* main.m */; };
+		45910B8C18FB3D260059CFF9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910B8B18FB3D260059CFF9 /* AppDelegate.m */; };
+		45910B8F18FB3D260059CFF9 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 45910B8D18FB3D260059CFF9 /* Main_iPhone.storyboard */; };
+		45910B9218FB3D260059CFF9 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 45910B9018FB3D260059CFF9 /* Main_iPad.storyboard */; };
+		45910B9518FB3D260059CFF9 /* JogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910B9418FB3D260059CFF9 /* JogViewController.m */; };
+		45910B9818FB3D260059CFF9 /* SecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910B9718FB3D260059CFF9 /* SecondViewController.m */; };
+		45910B9A18FB3D260059CFF9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45910B9918FB3D260059CFF9 /* Images.xcassets */; };
+		45910BA118FB3D260059CFF9 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910BA018FB3D260059CFF9 /* XCTest.framework */; };
+		45910BA218FB3D260059CFF9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7B18FB3D260059CFF9 /* Foundation.framework */; };
+		45910BA318FB3D260059CFF9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7F18FB3D260059CFF9 /* UIKit.framework */; };
+		45910BAB18FB3D260059CFF9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 45910BA918FB3D260059CFF9 /* InfoPlist.strings */; };
+		45910BAD18FB3D260059CFF9 /* LathserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BAC18FB3D260059CFF9 /* LathserTests.m */; };
+		45910BBF18FB60F00059CFF9 /* yellowIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */; };
+		45910BC018FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */; };
+		45910BC118FB60F00059CFF9 /* grayIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */; };
+		45910BC218FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */; };
+		45910BC318FB60F00059CFF9 /* greenIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */; };
+		45910BC418FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */; };
+		45910BC518FB60F00059CFF9 /* redIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */; };
+		45910BC618FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */; };
+		45910BC918FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */; };
+		45910BCA18FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */; };
+		45910BCF18FB736D0059CFF9 /* UARTPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BCE18FB736D0059CFF9 /* UARTPeripheral.m */; };
+		45910BD218FB73DA0059CFF9 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BD118FB73DA0059CFF9 /* CBUUID+StringExtraction.m */; };
+		45910BD418FB7E0C0059CFF9 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910BD318FB7E0C0059CFF9 /* CoreBluetooth.framework */; };
+		45D480C01ABDF525009D3AE8 /* dialHand41x135.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480BC1ABDF525009D3AE8 /* dialHand41x135.png */; };
+		45D480C11ABDF525009D3AE8 /* dialHand41x135@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480BD1ABDF525009D3AE8 /* dialHand41x135@2x.png */; };
+		45D480C21ABDF525009D3AE8 /* dialFace281x281.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480BE1ABDF525009D3AE8 /* dialFace281x281.png */; };
+		45D480C31ABDF525009D3AE8 /* dialFace281x281@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480BF1ABDF525009D3AE8 /* dialFace281x281@2x.png */; };
+		45D480C61ABDF59B009D3AE8 /* DialView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45D480C51ABDF59B009D3AE8 /* DialView.m */; };
+		45D480C91ABE3CAF009D3AE8 /* DialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45D480C81ABE3CAF009D3AE8 /* DialViewController.m */; };
+		45D480CC1ABE8229009D3AE8 /* dialMark19x46.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480CA1ABE8229009D3AE8 /* dialMark19x46.png */; };
+		45D480CD1ABE8229009D3AE8 /* dialMark19x46@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480CB1ABE8229009D3AE8 /* dialMark19x46@2x.png */; };
+		45D480D21ABF28BB009D3AE8 /* rightArrow45x67.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480CE1ABF28BB009D3AE8 /* rightArrow45x67.png */; };
+		45D480D31ABF28BB009D3AE8 /* leftArrow45x67.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */; };
+		45D480D41ABF28BB009D3AE8 /* leftArrow45x67@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */; };
+		45D480D51ABF28BB009D3AE8 /* rightArrow45x67@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D11ABF28BB009D3AE8 /* rightArrow45x67@2x.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		45910BA418FB3D260059CFF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 45910B7018FB3D260059CFF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 45910B7718FB3D260059CFF9;
+			remoteInfo = BlueToothLETest;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		453CA2C218FD738A009068AB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		45910B7818FB3D260059CFF9 /* Lathser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lathser.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		45910B7B18FB3D260059CFF9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		45910B7D18FB3D260059CFF9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		45910B7F18FB3D260059CFF9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		45910B8318FB3D260059CFF9 /* Lathser-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Lathser-Info.plist"; sourceTree = "<group>"; };
+		45910B8518FB3D260059CFF9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		45910B8718FB3D260059CFF9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		45910B8918FB3D260059CFF9 /* Lathser-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lathser-Prefix.pch"; sourceTree = "<group>"; };
+		45910B8A18FB3D260059CFF9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		45910B8B18FB3D260059CFF9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		45910B8E18FB3D260059CFF9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
+		45910B9118FB3D260059CFF9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
+		45910B9318FB3D260059CFF9 /* JogViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JogViewController.h; sourceTree = "<group>"; };
+		45910B9418FB3D260059CFF9 /* JogViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JogViewController.m; sourceTree = "<group>"; };
+		45910B9618FB3D260059CFF9 /* SecondViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SecondViewController.h; sourceTree = "<group>"; };
+		45910B9718FB3D260059CFF9 /* SecondViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SecondViewController.m; sourceTree = "<group>"; };
+		45910B9918FB3D260059CFF9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		45910B9F18FB3D260059CFF9 /* LathserTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LathserTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		45910BA018FB3D260059CFF9 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		45910BA818FB3D260059CFF9 /* LathserTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LathserTests-Info.plist"; sourceTree = "<group>"; };
+		45910BAA18FB3D260059CFF9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		45910BAC18FB3D260059CFF9 /* LathserTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LathserTests.m; sourceTree = "<group>"; };
+		45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yellowIndicatorCircle32x32.png; path = Assets/yellowIndicatorCircle32x32.png; sourceTree = "<group>"; };
+		45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "yellowIndicatorCircle32x32@2x.png"; path = "Assets/yellowIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
+		45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = grayIndicatorCircle32x32.png; path = Assets/grayIndicatorCircle32x32.png; sourceTree = "<group>"; };
+		45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "grayIndicatorCircle32x32@2x.png"; path = "Assets/grayIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
+		45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = greenIndicatorCircle32x32.png; path = Assets/greenIndicatorCircle32x32.png; sourceTree = "<group>"; };
+		45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "greenIndicatorCircle32x32@2x.png"; path = "Assets/greenIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
+		45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = redIndicatorCircle32x32.png; path = Assets/redIndicatorCircle32x32.png; sourceTree = "<group>"; };
+		45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "redIndicatorCircle32x32@2x.png"; path = "Assets/redIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
+		45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = whiteIndicatorCircle32x32.png; path = Assets/whiteIndicatorCircle32x32.png; sourceTree = "<group>"; };
+		45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "whiteIndicatorCircle32x32@2x.png"; path = "Assets/whiteIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
+		45910BCD18FB736D0059CFF9 /* UARTPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UARTPeripheral.h; sourceTree = "<group>"; };
+		45910BCE18FB736D0059CFF9 /* UARTPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UARTPeripheral.m; sourceTree = "<group>"; };
+		45910BD018FB73DA0059CFF9 /* CBUUID+StringExtraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBUUID+StringExtraction.h"; sourceTree = "<group>"; };
+		45910BD118FB73DA0059CFF9 /* CBUUID+StringExtraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBUUID+StringExtraction.m"; sourceTree = "<group>"; };
+		45910BD318FB7E0C0059CFF9 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		45D480BC1ABDF525009D3AE8 /* dialHand41x135.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dialHand41x135.png; path = Assets/dialHand41x135.png; sourceTree = "<group>"; };
+		45D480BD1ABDF525009D3AE8 /* dialHand41x135@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "dialHand41x135@2x.png"; path = "Assets/dialHand41x135@2x.png"; sourceTree = "<group>"; };
+		45D480BE1ABDF525009D3AE8 /* dialFace281x281.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dialFace281x281.png; path = Assets/dialFace281x281.png; sourceTree = "<group>"; };
+		45D480BF1ABDF525009D3AE8 /* dialFace281x281@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "dialFace281x281@2x.png"; path = "Assets/dialFace281x281@2x.png"; sourceTree = "<group>"; };
+		45D480C41ABDF59B009D3AE8 /* DialView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DialView.h; sourceTree = "<group>"; };
+		45D480C51ABDF59B009D3AE8 /* DialView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DialView.m; sourceTree = "<group>"; };
+		45D480C71ABE3CAF009D3AE8 /* DialViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DialViewController.h; sourceTree = "<group>"; };
+		45D480C81ABE3CAF009D3AE8 /* DialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DialViewController.m; sourceTree = "<group>"; };
+		45D480CA1ABE8229009D3AE8 /* dialMark19x46.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dialMark19x46.png; path = Assets/dialMark19x46.png; sourceTree = "<group>"; };
+		45D480CB1ABE8229009D3AE8 /* dialMark19x46@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "dialMark19x46@2x.png"; path = "Assets/dialMark19x46@2x.png"; sourceTree = "<group>"; };
+		45D480CE1ABF28BB009D3AE8 /* rightArrow45x67.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = rightArrow45x67.png; path = Assets/rightArrow45x67.png; sourceTree = "<group>"; };
+		45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = leftArrow45x67.png; path = Assets/leftArrow45x67.png; sourceTree = "<group>"; };
+		45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "leftArrow45x67@2x.png"; path = "Assets/leftArrow45x67@2x.png"; sourceTree = "<group>"; };
+		45D480D11ABF28BB009D3AE8 /* rightArrow45x67@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "rightArrow45x67@2x.png"; path = "Assets/rightArrow45x67@2x.png"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		45910B7518FB3D260059CFF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				453CA2C318FD738A009068AB /* QuartzCore.framework in Frameworks */,
+				45910BD418FB7E0C0059CFF9 /* CoreBluetooth.framework in Frameworks */,
+				45910B8018FB3D260059CFF9 /* UIKit.framework in Frameworks */,
+				45910B7C18FB3D260059CFF9 /* Foundation.framework in Frameworks */,
+				45910B7E18FB3D260059CFF9 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45910B9C18FB3D260059CFF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45910BA118FB3D260059CFF9 /* XCTest.framework in Frameworks */,
+				45910BA318FB3D260059CFF9 /* UIKit.framework in Frameworks */,
+				45910BA218FB3D260059CFF9 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		45910B6F18FB3D260059CFF9 = {
+			isa = PBXGroup;
+			children = (
+				45910BCC18FB736D0059CFF9 /* ThirdParty */,
+				45910BB618FB5FC20059CFF9 /* Assets */,
+				45910B8118FB3D260059CFF9 /* Lathser */,
+				45910BA618FB3D260059CFF9 /* LathserTests */,
+				45910B7A18FB3D260059CFF9 /* Frameworks */,
+				45910B7918FB3D260059CFF9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		45910B7918FB3D260059CFF9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				45910B7818FB3D260059CFF9 /* Lathser.app */,
+				45910B9F18FB3D260059CFF9 /* LathserTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		45910B7A18FB3D260059CFF9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				453CA2C218FD738A009068AB /* QuartzCore.framework */,
+				45910BD318FB7E0C0059CFF9 /* CoreBluetooth.framework */,
+				45910B7B18FB3D260059CFF9 /* Foundation.framework */,
+				45910B7D18FB3D260059CFF9 /* CoreGraphics.framework */,
+				45910B7F18FB3D260059CFF9 /* UIKit.framework */,
+				45910BA018FB3D260059CFF9 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		45910B8118FB3D260059CFF9 /* Lathser */ = {
+			isa = PBXGroup;
+			children = (
+				45910B8A18FB3D260059CFF9 /* AppDelegate.h */,
+				45910B8B18FB3D260059CFF9 /* AppDelegate.m */,
+				45D480C41ABDF59B009D3AE8 /* DialView.h */,
+				45D480C51ABDF59B009D3AE8 /* DialView.m */,
+				45D480C71ABE3CAF009D3AE8 /* DialViewController.h */,
+				45D480C81ABE3CAF009D3AE8 /* DialViewController.m */,
+				45910B8D18FB3D260059CFF9 /* Main_iPhone.storyboard */,
+				45910B9018FB3D260059CFF9 /* Main_iPad.storyboard */,
+				45910B9318FB3D260059CFF9 /* JogViewController.h */,
+				45910B9418FB3D260059CFF9 /* JogViewController.m */,
+				45910B9618FB3D260059CFF9 /* SecondViewController.h */,
+				45910B9718FB3D260059CFF9 /* SecondViewController.m */,
+				45910B9918FB3D260059CFF9 /* Images.xcassets */,
+				45910B8218FB3D260059CFF9 /* Supporting Files */,
+			);
+			path = Lathser;
+			sourceTree = "<group>";
+		};
+		45910B8218FB3D260059CFF9 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				45910B8318FB3D260059CFF9 /* Lathser-Info.plist */,
+				45910B8418FB3D260059CFF9 /* InfoPlist.strings */,
+				45910B8718FB3D260059CFF9 /* main.m */,
+				45910B8918FB3D260059CFF9 /* Lathser-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		45910BA618FB3D260059CFF9 /* LathserTests */ = {
+			isa = PBXGroup;
+			children = (
+				45910BAC18FB3D260059CFF9 /* LathserTests.m */,
+				45910BA718FB3D260059CFF9 /* Supporting Files */,
+			);
+			path = LathserTests;
+			sourceTree = "<group>";
+		};
+		45910BA718FB3D260059CFF9 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				45910BA818FB3D260059CFF9 /* LathserTests-Info.plist */,
+				45910BA918FB3D260059CFF9 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		45910BB618FB5FC20059CFF9 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				45D480CE1ABF28BB009D3AE8 /* rightArrow45x67.png */,
+				45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */,
+				45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */,
+				45D480D11ABF28BB009D3AE8 /* rightArrow45x67@2x.png */,
+				45D480CA1ABE8229009D3AE8 /* dialMark19x46.png */,
+				45D480CB1ABE8229009D3AE8 /* dialMark19x46@2x.png */,
+				45D480BC1ABDF525009D3AE8 /* dialHand41x135.png */,
+				45D480BD1ABDF525009D3AE8 /* dialHand41x135@2x.png */,
+				45D480BE1ABDF525009D3AE8 /* dialFace281x281.png */,
+				45D480BF1ABDF525009D3AE8 /* dialFace281x281@2x.png */,
+				45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */,
+				45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */,
+				45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */,
+				45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */,
+				45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */,
+				45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */,
+				45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */,
+				45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */,
+				45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */,
+				45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
+		45910BCC18FB736D0059CFF9 /* ThirdParty */ = {
+			isa = PBXGroup;
+			children = (
+				45910BD018FB73DA0059CFF9 /* CBUUID+StringExtraction.h */,
+				45910BD118FB73DA0059CFF9 /* CBUUID+StringExtraction.m */,
+				45910BCD18FB736D0059CFF9 /* UARTPeripheral.h */,
+				45910BCE18FB736D0059CFF9 /* UARTPeripheral.m */,
+			);
+			path = ThirdParty;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		45910B7718FB3D260059CFF9 /* Lathser */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 45910BB018FB3D260059CFF9 /* Build configuration list for PBXNativeTarget "Lathser" */;
+			buildPhases = (
+				45910B7418FB3D260059CFF9 /* Sources */,
+				45910B7518FB3D260059CFF9 /* Frameworks */,
+				45910B7618FB3D260059CFF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Lathser;
+			productName = BlueToothLETest;
+			productReference = 45910B7818FB3D260059CFF9 /* Lathser.app */;
+			productType = "com.apple.product-type.application";
+		};
+		45910B9E18FB3D260059CFF9 /* LathserTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 45910BB318FB3D260059CFF9 /* Build configuration list for PBXNativeTarget "LathserTests" */;
+			buildPhases = (
+				45910B9B18FB3D260059CFF9 /* Sources */,
+				45910B9C18FB3D260059CFF9 /* Frameworks */,
+				45910B9D18FB3D260059CFF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				45910BA518FB3D260059CFF9 /* PBXTargetDependency */,
+			);
+			name = LathserTests;
+			productName = BlueToothLETestTests;
+			productReference = 45910B9F18FB3D260059CFF9 /* LathserTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		45910B7018FB3D260059CFF9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Kurt Schaefer";
+				TargetAttributes = {
+					45910B9E18FB3D260059CFF9 = {
+						TestTargetID = 45910B7718FB3D260059CFF9;
+					};
+				};
+			};
+			buildConfigurationList = 45910B7318FB3D260059CFF9 /* Build configuration list for PBXProject "Lathser" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 45910B6F18FB3D260059CFF9;
+			productRefGroup = 45910B7918FB3D260059CFF9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				45910B7718FB3D260059CFF9 /* Lathser */,
+				45910B9E18FB3D260059CFF9 /* LathserTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		45910B7618FB3D260059CFF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45910BC318FB60F00059CFF9 /* greenIndicatorCircle32x32.png in Resources */,
+				45910BCA18FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png in Resources */,
+				45D480CD1ABE8229009D3AE8 /* dialMark19x46@2x.png in Resources */,
+				45D480C01ABDF525009D3AE8 /* dialHand41x135.png in Resources */,
+				45910BC218FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png in Resources */,
+				45910B9218FB3D260059CFF9 /* Main_iPad.storyboard in Resources */,
+				45910B9A18FB3D260059CFF9 /* Images.xcassets in Resources */,
+				45D480D31ABF28BB009D3AE8 /* leftArrow45x67.png in Resources */,
+				45910BC518FB60F00059CFF9 /* redIndicatorCircle32x32.png in Resources */,
+				45910B8F18FB3D260059CFF9 /* Main_iPhone.storyboard in Resources */,
+				45D480D51ABF28BB009D3AE8 /* rightArrow45x67@2x.png in Resources */,
+				45D480C21ABDF525009D3AE8 /* dialFace281x281.png in Resources */,
+				45D480CC1ABE8229009D3AE8 /* dialMark19x46.png in Resources */,
+				45910B8618FB3D260059CFF9 /* InfoPlist.strings in Resources */,
+				45910BBF18FB60F00059CFF9 /* yellowIndicatorCircle32x32.png in Resources */,
+				45910BC018FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png in Resources */,
+				45D480C31ABDF525009D3AE8 /* dialFace281x281@2x.png in Resources */,
+				45910BC418FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png in Resources */,
+				45910BC118FB60F00059CFF9 /* grayIndicatorCircle32x32.png in Resources */,
+				45D480C11ABDF525009D3AE8 /* dialHand41x135@2x.png in Resources */,
+				45D480D41ABF28BB009D3AE8 /* leftArrow45x67@2x.png in Resources */,
+				45910BC918FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png in Resources */,
+				45910BC618FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png in Resources */,
+				45D480D21ABF28BB009D3AE8 /* rightArrow45x67.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45910B9D18FB3D260059CFF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45910BAB18FB3D260059CFF9 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		45910B7418FB3D260059CFF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45D480C91ABE3CAF009D3AE8 /* DialViewController.m in Sources */,
+				45D480C61ABDF59B009D3AE8 /* DialView.m in Sources */,
+				45910B9818FB3D260059CFF9 /* SecondViewController.m in Sources */,
+				45910BCF18FB736D0059CFF9 /* UARTPeripheral.m in Sources */,
+				45910B8C18FB3D260059CFF9 /* AppDelegate.m in Sources */,
+				45910BD218FB73DA0059CFF9 /* CBUUID+StringExtraction.m in Sources */,
+				45910B9518FB3D260059CFF9 /* JogViewController.m in Sources */,
+				45910B8818FB3D260059CFF9 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45910B9B18FB3D260059CFF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45910BAD18FB3D260059CFF9 /* LathserTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		45910BA518FB3D260059CFF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 45910B7718FB3D260059CFF9 /* Lathser */;
+			targetProxy = 45910BA418FB3D260059CFF9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		45910B8418FB3D260059CFF9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				45910B8518FB3D260059CFF9 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		45910B8D18FB3D260059CFF9 /* Main_iPhone.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				45910B8E18FB3D260059CFF9 /* Base */,
+			);
+			name = Main_iPhone.storyboard;
+			sourceTree = "<group>";
+		};
+		45910B9018FB3D260059CFF9 /* Main_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				45910B9118FB3D260059CFF9 /* Base */,
+			);
+			name = Main_iPad.storyboard;
+			sourceTree = "<group>";
+		};
+		45910BA918FB3D260059CFF9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				45910BAA18FB3D260059CFF9 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		45910BAE18FB3D260059CFF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		45910BAF18FB3D260059CFF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		45910BB118FB3D260059CFF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Lathser/Lathser-Prefix.pch";
+				INFOPLIST_FILE = "$(SRCROOT)/Lathser/Lathser-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				PRODUCT_NAME = Lathser;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		45910BB218FB3D260059CFF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Lathser/Lathser-Prefix.pch";
+				INFOPLIST_FILE = "$(SRCROOT)/Lathser/Lathser-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				PRODUCT_NAME = Lathser;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		45910BB418FB3D260059CFF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BlueToothLETest.app/BlueToothLETest";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BlueToothLETest/BlueToothLETest-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "BlueToothLETestTests/LathserTests-Info.plist";
+				PRODUCT_NAME = LathserTests;
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		45910BB518FB3D260059CFF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BlueToothLETest.app/BlueToothLETest";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BlueToothLETest/BlueToothLETest-Prefix.pch";
+				INFOPLIST_FILE = "BlueToothLETestTests/LathserTests-Info.plist";
+				PRODUCT_NAME = LathserTests;
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		45910B7318FB3D260059CFF9 /* Build configuration list for PBXProject "Lathser" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45910BAE18FB3D260059CFF9 /* Debug */,
+				45910BAF18FB3D260059CFF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		45910BB018FB3D260059CFF9 /* Build configuration list for PBXNativeTarget "Lathser" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45910BB118FB3D260059CFF9 /* Debug */,
+				45910BB218FB3D260059CFF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		45910BB318FB3D260059CFF9 /* Build configuration list for PBXNativeTarget "LathserTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45910BB418FB3D260059CFF9 /* Debug */,
+				45910BB518FB3D260059CFF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 45910B7018FB3D260059CFF9 /* Project object */;
+}
