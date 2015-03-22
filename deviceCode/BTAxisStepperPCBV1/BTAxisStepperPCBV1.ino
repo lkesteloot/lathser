@@ -112,9 +112,14 @@ void setLed(char ledState)
 
 void sendThermalSensorValue()
 {
-  int thermalValue = analogRead(THERM_LASER_SENS_ANALOG_IN);
+  int thermalValue =  averagedThermalReading();
   sendStringBT(&String("TEMP " + String(thermalValue)));
   Serial.println(String(thermalValue).c_str());
+}
+
+void sendStepperPosition()
+{
+  sendStringBT(&String("POS " + String(Stepper.currentPosition())));
 }
 
 void blePoll()
@@ -182,9 +187,10 @@ void sendStringBT(String *s)
     s->getBytes(sendbuffer, 20);
     char sendbuffersize = min(20, s->length());
      BTLEserial.write(sendbuffer, sendbuffersize);
+     blePoll();
 }
 
-// When the stepper motor produces a lot of noise
+// The stepper motor produces a lot of noise
 // so we average 16 readings to try and smooth out 
 // the worst of it.  If you just read this drectly it
 // triggers all the time.
@@ -228,6 +234,12 @@ void sequenceLoop()
   while (gPositionArrayIndex < gPositionArraySize) {
     Serial.print("    sequence to ");
     Serial.println(gPositionArray[gPositionArrayIndex]);
+
+    // Report all the info for this step, then run to the new position.
+    sendThermalSensorValue();
+    sendStepperPosition();
+    sendStringBT(&String("RUN " + String(gPositionArrayIndex)));
+    
     Stepper.runToNewPosition(gPositionArray[gPositionArrayIndex]);
 
     // If we got some sort of BT command.
@@ -253,6 +265,7 @@ void sequenceLoop()
 	return;
       }
     } else {
+      sendStringBT(&String("THERM"));
       // If the thermal trip went off.
       gPositionArrayIndex++;
     }
@@ -289,6 +302,7 @@ void commandLoop()
     } else if (commandChar == 's') {
       // s means start going though the position sequence.
       gPositionArrayIndex = 0;
+      sendStringBT(&String("RUN " + String(gPositionArrayIndex)));
       Stepper.setCurrentPosition(0);
       sequenceLoop();
     } else if (commandChar == 't') {

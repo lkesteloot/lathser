@@ -49,6 +49,8 @@
 		45D480D31ABF28BB009D3AE8 /* leftArrow45x67.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */; };
 		45D480D41ABF28BB009D3AE8 /* leftArrow45x67@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */; };
 		45D480D51ABF28BB009D3AE8 /* rightArrow45x67@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D11ABF28BB009D3AE8 /* rightArrow45x67@2x.png */; };
+		45D480D71ABF602B009D3AE8 /* thermalSensor51x44@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D61ABF602B009D3AE8 /* thermalSensor51x44@2x.png */; };
+		45D480D91ABF607D009D3AE8 /* thermalSensor51x44.png in Resources */ = {isa = PBXBuildFile; fileRef = 45D480D81ABF607D009D3AE8 /* thermalSensor51x44.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +116,8 @@
 		45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = leftArrow45x67.png; path = Assets/leftArrow45x67.png; sourceTree = "<group>"; };
 		45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "leftArrow45x67@2x.png"; path = "Assets/leftArrow45x67@2x.png"; sourceTree = "<group>"; };
 		45D480D11ABF28BB009D3AE8 /* rightArrow45x67@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "rightArrow45x67@2x.png"; path = "Assets/rightArrow45x67@2x.png"; sourceTree = "<group>"; };
+		45D480D61ABF602B009D3AE8 /* thermalSensor51x44@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "thermalSensor51x44@2x.png"; path = "Assets/thermalSensor51x44@2x.png"; sourceTree = "<group>"; };
+		45D480D81ABF607D009D3AE8 /* thermalSensor51x44.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = thermalSensor51x44.png; path = Assets/thermalSensor51x44.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +233,8 @@
 		45910BB618FB5FC20059CFF9 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				45D480D81ABF607D009D3AE8 /* thermalSensor51x44.png */,
+				45D480D61ABF602B009D3AE8 /* thermalSensor51x44@2x.png */,
 				45D480CE1ABF28BB009D3AE8 /* rightArrow45x67.png */,
 				45D480CF1ABF28BB009D3AE8 /* leftArrow45x67.png */,
 				45D480D01ABF28BB009D3AE8 /* leftArrow45x67@2x.png */,
@@ -345,6 +351,7 @@
 				45D480CD1ABE8229009D3AE8 /* dialMark19x46@2x.png in Resources */,
 				45D480C01ABDF525009D3AE8 /* dialHand41x135.png in Resources */,
 				45910BC218FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png in Resources */,
+				45D480D71ABF602B009D3AE8 /* thermalSensor51x44@2x.png in Resources */,
 				45910B9218FB3D260059CFF9 /* Main_iPad.storyboard in Resources */,
 				45910B9A18FB3D260059CFF9 /* Images.xcassets in Resources */,
 				45D480D31ABF28BB009D3AE8 /* leftArrow45x67.png in Resources */,
@@ -355,6 +362,7 @@
 				45D480CC1ABE8229009D3AE8 /* dialMark19x46.png in Resources */,
 				45910B8618FB3D260059CFF9 /* InfoPlist.strings in Resources */,
 				45910BBF18FB60F00059CFF9 /* yellowIndicatorCircle32x32.png in Resources */,
+				45D480D91ABF607D009D3AE8 /* thermalSensor51x44.png in Resources */,
 				45910BC018FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png in Resources */,
 				45D480C31ABDF525009D3AE8 /* dialFace281x281@2x.png in Resources */,
 				45910BC418FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png in Resources */,

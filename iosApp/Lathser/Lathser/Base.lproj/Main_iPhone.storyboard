@@ -53,19 +53,26 @@
                                     <action selector="nextButtonTouchUpInside:" destination="CZ4-MO-1fc" eventType="touchUpInside" id="TBL-w0-00C"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VI0-Gw-KeN" customClass="DialView">
-                                <rect key="frame" x="24" y="87" width="273" height="273"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5QZ-oA-tzb">
-                                <rect key="frame" x="191" y="466" width="109" height="30"/>
-                                <state key="normal" title="Send Sequence">
+                                <rect key="frame" x="262" y="466" width="36" height="30"/>
+                                <state key="normal" title="Send">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
                                     <action selector="sendSequenceButtonTouchUpinside:" destination="CZ4-MO-1fc" eventType="touchUpInside" id="BRc-M3-CgO"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VI0-Gw-KeN" customClass="DialView">
+                                <rect key="frame" x="24" y="87" width="273" height="273"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SWd-Ar-FN1">
+                                <rect key="frame" x="270" y="373" width="21" height="19"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="thermalSensor51x44.png" translatesAutoresizingMaskIntoConstraints="NO" id="w18-5e-FQG">
+                                <rect key="frame" x="264" y="368" width="33" height="30"/>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                     </view>
@@ -74,11 +81,13 @@
                         <outlet property="connectionButton" destination="awn-ja-tem" id="H6v-hS-His"/>
                         <outlet property="connectionStatusLabel" destination="9p3-Uq-kni" id="vnG-tW-cuc"/>
                         <outlet property="dialView" destination="VI0-Gw-KeN" id="jbm-Q8-U8s"/>
+                        <outlet property="thermalSensorImageView" destination="w18-5e-FQG" id="EYR-um-XhK"/>
+                        <outlet property="thermalSensorView" destination="SWd-Ar-FN1" id="q1U-nF-Tmc"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qh2-T1-AhA" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="653" y="-138"/>
+            <point key="canvasLocation" x="705" y="-138"/>
         </scene>
         <!--Second-->
         <scene sceneID="ot8-2e-RuS">
@@ -172,6 +181,7 @@
         <image name="leftArrow45x67.png" width="45" height="67"/>
         <image name="rightArrow45x67.png" width="45" height="67"/>
         <image name="second" width="30" height="30"/>
+        <image name="thermalSensor51x44.png" width="51" height="45"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>

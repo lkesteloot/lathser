@@ -28,6 +28,9 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 
 
 @property (nonatomic, strong) IBOutlet DialView* dialView;
+@property (nonatomic, strong) IBOutlet UIView* thermalSensorView;
+@property (nonatomic, strong) IBOutlet UIImageView* thermalSensorImageView;
+
 @property (weak, nonatomic) IBOutlet UIImageView *nearLimitIndicatorImageView;
 @property (weak, nonatomic) IBOutlet UIImageView *farLimitIndicatorImageView;
 @property (nonatomic, assign) BOOL nearLimitReached;
@@ -46,6 +49,7 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     if (self) {
         self.cbManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         self.connectionState = JogConnectionStateNotConnected;
+
         self.positions = [[NSMutableArray alloc] init];
         [self.positions addObject:@(0.0f)];
         [self.positions addObject:@(1*M_PI/8.0)];
@@ -55,6 +59,8 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         [self.positions addObject:@(5*M_PI/8.0)];
         [self.positions addObject:@(6*M_PI/8.0)];
         [self.positions addObject:@(6*M_PI/8.0 + 9*M_PI/8.0)];
+
+        [self updateThermalSensorColor:85];
     }
     return self;
 }
@@ -145,6 +151,51 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         self.dialView.currentPositionIndex++;
     }
     [self sendString:@"n"];
+}
+
+
+- (UIColor *)interpColorFrom:(UIColor*)fromColor
+                        to:(UIColor *)toColor
+              t:(float)t
+{
+    if (t < 0.0f) {
+        return fromColor;
+    }
+    if (t > 1.0f) {
+        return toColor;
+    }
+
+    const CGFloat *fromComponents = CGColorGetComponents(fromColor.CGColor);
+    const CGFloat *toComponents = CGColorGetComponents(toColor.CGColor);
+
+    float r = fromComponents[0] + (toComponents[0] - fromComponents[0])*t;
+    float g = fromComponents[1] + (toComponents[1] - fromComponents[1])*t;
+    float b = fromComponents[2] + (toComponents[2] - fromComponents[2])*t;
+
+    return [UIColor colorWithRed:r green:g blue:b alpha:1.0];
+}
+
+- (void)updateThermalSensorColor:(NSInteger)value
+{
+    UIColor* bottomColor = [UIColor colorWithRed:93.0/255.0
+                                           green:157.0/255.0
+                                            blue:73.0/255.0 alpha:1.0];
+    UIColor* middleColor = [UIColor colorWithRed:219.0/255.0
+                                           green:217.0/255.0
+                                            blue:74.0/255.0 alpha:1.0];
+    UIColor* topColor = [UIColor colorWithRed:218.0/255.0
+                                        green:78.0/255.0
+                                         blue:68.0/255.0 alpha:1.0];
+
+    CGFloat ratio = (CGFloat)value/1024.0f;
+    UIColor* color = bottomColor;
+
+    if (ratio < 0.5) {
+        color = [self interpColorFrom:bottomColor to:middleColor t:ratio*2.0];
+    } else {
+        color = [self interpColorFrom:middleColor to:topColor t:ratio*2.0 - 1.0];
+    }
+    self.thermalSensorView.backgroundColor = color;
 }
 
 - (void)updateConnectionStateLabel
@@ -362,14 +413,27 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
                                                   length:dataLength
                                                 encoding:NSUTF8StringEncoding];
     NSLog(@"ReceivData: %@", newString);
-    if ([newString isEqualToString:@"F0"]) {
-        self.farLimitReached = FALSE;
-    } else if ([newString isEqualToString:@"F1"]) {
-        self.farLimitReached = TRUE;
-    } else if ([newString isEqualToString:@"N0"]) {
-        self.nearLimitReached = FALSE;
-    } else if ([newString isEqualToString:@"N1"]) {
-        self.nearLimitReached = TRUE;
+    NSArray* stringComponents = [newString componentsSeparatedByString:@" "];
+
+    if (stringComponents.count == 1) {
+        NSString* command = [stringComponents objectAtIndex:0];
+        if ([command isEqualToString:@"THERM"]) {
+            // TODO: Indicate thermal pulse, hopefully by drawing an expanding ring
+            // out of the thermal sensor display.
+        }
+    } else if (stringComponents.count == 2) {
+        NSString* command = [stringComponents objectAtIndex:0];
+        NSString* arg = [stringComponents objectAtIndex:1];
+        if ([command isEqualToString:@"TEMP"]) {
+            [self updateThermalSensorColor:[arg integerValue]];
+        } else if ([command isEqualToString:@"RUN"]) {
+            self.dialView.currentPositionIndex = [arg integerValue];
+        } else if ([command isEqualToString:@"POS"]) {
+            // Not sure what to do about it saying exactly where it is.
+            // We should probably do something about this, but for now
+            // since we're not doing direct remote controlling we do everything by index.
+            // Knowing the current position will allow us to estiamate animation times better.
+        }
     }
 }
 
