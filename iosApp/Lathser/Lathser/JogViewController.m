@@ -58,8 +58,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         [self.positions addObject:@(6*M_PI/8.0)];
         [self.positions addObject:@(7*M_PI/8.0)];
         [self.positions addObject:@(6*M_PI/8.0 + 9*M_PI/8.0)];
-
-        [self updateThermalSensorColor:85];
     }
     return self;
 }
@@ -247,6 +245,12 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     _connectionState = connectionState;
     [self updateConnectionStateLabel];
     [self updateConnectButton];
+
+    // We put this to white if we're disconnected so we don't show a misleading
+    // green light.
+    if (self.connectionState != JogConnectionStateConnected) {
+        self.thermalSensorView.backgroundColor = [UIColor whiteColor];
+    }
 }
 
 - (NSString*)hexRepresentationOfData:(NSData*)data withSpaces:(BOOL)spaces
