@@ -303,6 +303,7 @@ void commandLoop()
       // s means start going though the position sequence.
       gPositionArrayIndex = 0;
       sendStringBT(&String("RUN " + String(gPositionArrayIndex)));
+      sendThermalSensorValue();
       Stepper.setCurrentPosition(0);
       sequenceLoop();
     } else if (commandChar == 't') {
