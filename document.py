@@ -13,7 +13,10 @@ class Document:
     # Pixels per inch.
     def getResolution(self):
         # Max this out because we can only generate integer cut points.
-        return 1200
+        # return 1200
+
+        # Match Fusion default.
+        return 600
 
     def getEnableEngraving(self):
         # We don't support engraving (raster mode).
