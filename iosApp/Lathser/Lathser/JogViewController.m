@@ -31,10 +31,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 @property (nonatomic, strong) IBOutlet UIView* thermalSensorView;
 @property (nonatomic, strong) IBOutlet UIImageView* thermalSensorImageView;
 
-@property (weak, nonatomic) IBOutlet UIImageView *nearLimitIndicatorImageView;
-@property (weak, nonatomic) IBOutlet UIImageView *farLimitIndicatorImageView;
-@property (nonatomic, assign) BOOL nearLimitReached;
-@property (nonatomic, assign) BOOL farLimitReached;
 
 @property (nonatomic, strong) NSMutableArray* positions;
 
@@ -51,6 +47,8 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         self.connectionState = JogConnectionStateNotConnected;
 
         self.positions = [[NSMutableArray alloc] init];
+
+        // Temp hard coded sequence for knight.
         [self.positions addObject:@(0.0f)];
         [self.positions addObject:@(1*M_PI/8.0)];
         [self.positions addObject:@(2*M_PI/8.0)];
@@ -58,6 +56,7 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         [self.positions addObject:@(4*M_PI/8.0)];
         [self.positions addObject:@(5*M_PI/8.0)];
         [self.positions addObject:@(6*M_PI/8.0)];
+        [self.positions addObject:@(7*M_PI/8.0)];
         [self.positions addObject:@(6*M_PI/8.0 + 9*M_PI/8.0)];
 
         [self updateThermalSensorColor:85];
@@ -121,35 +120,51 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     // Dispose of any resources that can be recreated.
 }
 
+- (NSInteger)stepValueForRadians:(CGFloat)theta
+{
+    // For now we assume 32 micro stepping and 400 steps per rev.  So Pi is 200*32
+    return floor((theta/M_PI)*(32*200));
+}
+
+- (void)sendAndStartCurrentSequence
+{
+    // Quit whatever we were doing.
+    [self sendString:@"q"];
+
+    // Do an "a800 " style adding of each of the coordinates.
+    // The positions are sent in steps.
+    for (NSNumber* number in self.positions) {
+        [self sendString:[NSString stringWithFormat:@"a%ld ", (long)[self stepValueForRadians:[number floatValue]]]];
+    }
+
+    // start the sequence, moving to the first location and
+    // waiting for the thermal sensor.
+    [self sendString:@"s"];
+}
+
 - (IBAction)sendSequenceButtonTouchUpinside:(id)sender
 {
     // 7 1/16 steps plus a 9/16 step at the end.
-    [self sendString:@"q"];
-    [self sendString:@"a0 "];
-    [self sendString:@"a800 "];
-    [self sendString:@"a1600 "];
-    [self sendString:@"a2400 "];
-    [self sendString:@"a3200 "];
-    [self sendString:@"a4000 "];
-    [self sendString:@"a4800 "];
-    [self sendString:@"a5600 "];
-    [self sendString:@"a12800 "];
-    [self sendString:@"s"];
+    [self sendAndStartCurrentSequence];
 }
 
 - (IBAction)previousButtonTouchUpInside:(id)sender
 {
-    if (self.dialView.currentPositionIndex > 0) {
-        self.dialView.currentPositionIndex--;
-    }
+    // It would be nice to have a "heading to"
+    // indication that comes up right away.
+//    if (self.dialView.currentPositionIndex > 0) {
+//        self.dialView.currentPositionIndex--;
+//    }
     [self sendString:@"p"];
 }
 
 - (IBAction)nextButtonTouchUpInside:(id)sender
 {
-    if (self.dialView.currentPositionIndex + 1 < self.positions.count) {
-        self.dialView.currentPositionIndex++;
-    }
+    // It would be nice to have a "heading to"
+    // indication that comes up right away.
+//    if (self.dialView.currentPositionIndex + 1 < self.positions.count) {
+//        self.dialView.currentPositionIndex++;
+//    }
     [self sendString:@"n"];
 }
 
@@ -234,33 +249,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     [self updateConnectButton];
 }
 
-- (void)updateLimitIndicator:(UIImageView*)indicatorImageView withIsReached:(BOOL)isReached
-{
-    if (isReached) {
-        [indicatorImageView setImage:[UIImage imageNamed:@"redIndicatorCircle32x32"]];
-    } else {
-        [indicatorImageView setImage:[UIImage imageNamed:@"whiteIndicatorCircle32x32"]];
-    }
-}
-
-- (void)setNearLimitReached:(BOOL)nearLimitReached
-{
-    if (_nearLimitReached == nearLimitReached) {
- //       return;
-    }
-    _nearLimitReached = nearLimitReached;
-    [self updateLimitIndicator:self.nearLimitIndicatorImageView withIsReached:nearLimitReached];
-}
-
-- (void)setFarLimitReached:(BOOL)farLimitReached
-{
-    if (_farLimitReached == farLimitReached) {
-        return;
-    }
-    _farLimitReached = farLimitReached;
-    [self updateLimitIndicator:self.farLimitIndicatorImageView withIsReached:farLimitReached];
-}
-
 - (NSString*)hexRepresentationOfData:(NSData*)data withSpaces:(BOOL)spaces
 {
 
@@ -288,6 +276,7 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 
 - (void)sendString:(NSString*)string
 {
+    NSLog(@"SendString: \"%@\"", string);
     NSData *data = [NSData dataWithBytes:string.UTF8String length:string.length];
     [self sendData:data];
 }
@@ -427,7 +416,10 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
         if ([command isEqualToString:@"TEMP"]) {
             [self updateThermalSensorColor:[arg integerValue]];
         } else if ([command isEqualToString:@"RUN"]) {
-            self.dialView.currentPositionIndex = [arg integerValue];
+            NSInteger newIndex = [arg integerValue];
+            if (newIndex >= 0 && newIndex < self.positions.count) {
+                self.dialView.currentPositionIndex = [arg integerValue];
+            }
         } else if ([command isEqualToString:@"POS"]) {
             // Not sure what to do about it saying exactly where it is.
             // We should probably do something about this, but for now

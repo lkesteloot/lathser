@@ -24,16 +24,6 @@
 		45910BA318FB3D260059CFF9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7F18FB3D260059CFF9 /* UIKit.framework */; };
 		45910BAB18FB3D260059CFF9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 45910BA918FB3D260059CFF9 /* InfoPlist.strings */; };
 		45910BAD18FB3D260059CFF9 /* LathserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BAC18FB3D260059CFF9 /* LathserTests.m */; };
-		45910BBF18FB60F00059CFF9 /* yellowIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */; };
-		45910BC018FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */; };
-		45910BC118FB60F00059CFF9 /* grayIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */; };
-		45910BC218FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */; };
-		45910BC318FB60F00059CFF9 /* greenIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */; };
-		45910BC418FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */; };
-		45910BC518FB60F00059CFF9 /* redIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */; };
-		45910BC618FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */; };
-		45910BC918FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */; };
-		45910BCA18FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */; };
 		45910BCF18FB736D0059CFF9 /* UARTPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BCE18FB736D0059CFF9 /* UARTPeripheral.m */; };
 		45910BD218FB73DA0059CFF9 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = 45910BD118FB73DA0059CFF9 /* CBUUID+StringExtraction.m */; };
 		45910BD418FB7E0C0059CFF9 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910BD318FB7E0C0059CFF9 /* CoreBluetooth.framework */; };
@@ -87,16 +77,6 @@
 		45910BA818FB3D260059CFF9 /* LathserTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LathserTests-Info.plist"; sourceTree = "<group>"; };
 		45910BAA18FB3D260059CFF9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		45910BAC18FB3D260059CFF9 /* LathserTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LathserTests.m; sourceTree = "<group>"; };
-		45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yellowIndicatorCircle32x32.png; path = Assets/yellowIndicatorCircle32x32.png; sourceTree = "<group>"; };
-		45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "yellowIndicatorCircle32x32@2x.png"; path = "Assets/yellowIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
-		45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = grayIndicatorCircle32x32.png; path = Assets/grayIndicatorCircle32x32.png; sourceTree = "<group>"; };
-		45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "grayIndicatorCircle32x32@2x.png"; path = "Assets/grayIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
-		45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = greenIndicatorCircle32x32.png; path = Assets/greenIndicatorCircle32x32.png; sourceTree = "<group>"; };
-		45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "greenIndicatorCircle32x32@2x.png"; path = "Assets/greenIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
-		45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = redIndicatorCircle32x32.png; path = Assets/redIndicatorCircle32x32.png; sourceTree = "<group>"; };
-		45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "redIndicatorCircle32x32@2x.png"; path = "Assets/redIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
-		45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = whiteIndicatorCircle32x32.png; path = Assets/whiteIndicatorCircle32x32.png; sourceTree = "<group>"; };
-		45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "whiteIndicatorCircle32x32@2x.png"; path = "Assets/whiteIndicatorCircle32x32@2x.png"; sourceTree = "<group>"; };
 		45910BCD18FB736D0059CFF9 /* UARTPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UARTPeripheral.h; sourceTree = "<group>"; };
 		45910BCE18FB736D0059CFF9 /* UARTPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UARTPeripheral.m; sourceTree = "<group>"; };
 		45910BD018FB73DA0059CFF9 /* CBUUID+StringExtraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBUUID+StringExtraction.h"; sourceTree = "<group>"; };
@@ -245,16 +225,6 @@
 				45D480BD1ABDF525009D3AE8 /* dialHand41x135@2x.png */,
 				45D480BE1ABDF525009D3AE8 /* dialFace281x281.png */,
 				45D480BF1ABDF525009D3AE8 /* dialFace281x281@2x.png */,
-				45910BC718FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png */,
-				45910BC818FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png */,
-				45910BB718FB60F00059CFF9 /* yellowIndicatorCircle32x32.png */,
-				45910BB818FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png */,
-				45910BB918FB60F00059CFF9 /* grayIndicatorCircle32x32.png */,
-				45910BBA18FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png */,
-				45910BBB18FB60F00059CFF9 /* greenIndicatorCircle32x32.png */,
-				45910BBC18FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png */,
-				45910BBD18FB60F00059CFF9 /* redIndicatorCircle32x32.png */,
-				45910BBE18FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png */,
 			);
 			name = Assets;
 			sourceTree = "<group>";
@@ -346,31 +316,21 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45910BC318FB60F00059CFF9 /* greenIndicatorCircle32x32.png in Resources */,
-				45910BCA18FB65BC0059CFF9 /* whiteIndicatorCircle32x32@2x.png in Resources */,
 				45D480CD1ABE8229009D3AE8 /* dialMark19x46@2x.png in Resources */,
 				45D480C01ABDF525009D3AE8 /* dialHand41x135.png in Resources */,
-				45910BC218FB60F00059CFF9 /* grayIndicatorCircle32x32@2x.png in Resources */,
 				45D480D71ABF602B009D3AE8 /* thermalSensor51x44@2x.png in Resources */,
 				45910B9218FB3D260059CFF9 /* Main_iPad.storyboard in Resources */,
 				45910B9A18FB3D260059CFF9 /* Images.xcassets in Resources */,
 				45D480D31ABF28BB009D3AE8 /* leftArrow45x67.png in Resources */,
-				45910BC518FB60F00059CFF9 /* redIndicatorCircle32x32.png in Resources */,
 				45910B8F18FB3D260059CFF9 /* Main_iPhone.storyboard in Resources */,
 				45D480D51ABF28BB009D3AE8 /* rightArrow45x67@2x.png in Resources */,
 				45D480C21ABDF525009D3AE8 /* dialFace281x281.png in Resources */,
 				45D480CC1ABE8229009D3AE8 /* dialMark19x46.png in Resources */,
 				45910B8618FB3D260059CFF9 /* InfoPlist.strings in Resources */,
-				45910BBF18FB60F00059CFF9 /* yellowIndicatorCircle32x32.png in Resources */,
 				45D480D91ABF607D009D3AE8 /* thermalSensor51x44.png in Resources */,
-				45910BC018FB60F00059CFF9 /* yellowIndicatorCircle32x32@2x.png in Resources */,
 				45D480C31ABDF525009D3AE8 /* dialFace281x281@2x.png in Resources */,
-				45910BC418FB60F00059CFF9 /* greenIndicatorCircle32x32@2x.png in Resources */,
-				45910BC118FB60F00059CFF9 /* grayIndicatorCircle32x32.png in Resources */,
 				45D480C11ABDF525009D3AE8 /* dialHand41x135@2x.png in Resources */,
 				45D480D41ABF28BB009D3AE8 /* leftArrow45x67@2x.png in Resources */,
-				45910BC918FB65BC0059CFF9 /* whiteIndicatorCircle32x32.png in Resources */,
-				45910BC618FB60F00059CFF9 /* redIndicatorCircle32x32@2x.png in Resources */,
 				45D480D21ABF28BB009D3AE8 /* rightArrow45x67.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
