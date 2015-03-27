@@ -4,6 +4,7 @@
 /data
 *.vector
 *.prn
+thetas.txt
 
 # Mac OS X
 *.DS_Store

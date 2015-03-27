@@ -75,7 +75,7 @@ GENERATE_LIT_VERSION = False
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 40, 0]
-PASS_SHADES = [0]
+# PASS_SHADES = [0]
 
 # The radius of the laser kerf, in inches.
 KERF_RADIUS_IN = 0.002
@@ -664,11 +664,14 @@ def main():
 
         all_paths = []
 
+        thetas_file = open("thetas.txt", "w")
+
         index = 0
         for pass_number, shade_percent in enumerate(PASS_SHADES):
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
             for angle in half_list(angles(ANGLE_COUNT)):
+                thetas_file.write("%g\n" % angle)
                 if GENERATE_LIT_VERSION:
                     image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
                     image.save("out%02d.png" % index)
@@ -747,6 +750,8 @@ def main():
                 print "The single path has %d vertices." % len(single_path)
 
             generate_file("out", all_paths)
+
+        thetas_file.close()
 
 if __name__ == "__main__":
     main()
