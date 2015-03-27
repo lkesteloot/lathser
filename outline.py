@@ -43,7 +43,7 @@ MARGIN = 0.1
 MODEL_DIAMETER = ROD_DIAMETER*(1 - MARGIN)
 
 # Number of cuts around the circle.
-ANGLE_COUNT = 2
+ANGLE_COUNT = 16
 
 # What we're targeting (viewing in Chrome or cutting on the laser cutter).
 TARGET_VIEW, TARGET_CUT = range(2)
@@ -532,9 +532,9 @@ def transform_vertices(vertices, transform, scale):
 
     return [transform.transformVector2(v) for v in vertices]
 
-# Make the laser jog all the way to the right of the bed so that we know to
-# manually advance the rotation of the rod.
-def make_separator():
+# Go to the spot that indicates to the hardware that it should advance to
+# the next step.
+def make_heat_sensor():
     x = 2.5*DPI
     y = 3.0*DPI
     radius = DPI/32.0
@@ -547,6 +547,22 @@ def make_separator():
         points.append(Vector2(x + math.cos(t)*radius, y + math.sin(t)*radius))
 
     return [points]
+
+# Go far away to give the hardware a chance to rotate.
+def make_time_waster():
+    x = (SVG_WIDTH - 2)*DPI
+    y = 3.0*DPI
+    radius = DPI/32.0
+    pointCount = 10
+
+    points = []
+
+    for i in range(pointCount + 1):
+        t = float(i)/pointCount*math.pi*2
+        points.append(Vector2(x + math.cos(t)*radius, y + math.sin(t)*radius))
+
+    return [points]
+
 
 def generate_svg(out, paths):
     out.write("""<?xml version="1.0" encoding="utf-8"?>
@@ -690,7 +706,8 @@ def main():
                             all_paths.append(path)
                     else:
                         all_paths.extend(paths)
-                        all_paths.extend(make_separator())
+                        all_paths.extend(make_heat_sensor())
+                        all_paths.extend(make_time_waster())
                 else:
                     generate_file("out%02d" % index, paths)
                 index += 1
