@@ -79,7 +79,7 @@ PCL_POS_Y = "\x1B*p%dY"
 HPGL_START = "\x1B%1B"
 
 # Reset PCL
-PCL_RESET = "\x1B\x45"
+PCL_RESET = "\x1BE"
 
 
 # PCL RASTER COMMANDS
