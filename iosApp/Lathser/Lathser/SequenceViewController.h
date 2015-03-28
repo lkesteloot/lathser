@@ -1,5 +1,5 @@
 //
-//  AppDelegate.h
+//  SequenceViewController.h
 //  Lathser
 //
 //  Created by Kurt Schaefer on 4/13/14.
@@ -19,9 +19,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreBluetooth/CoreBluetooth.h>
+#import "UARTPeripheral.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property (strong, nonatomic) UIWindow *window;
+@interface SequenceViewController : UIViewController <CBCentralManagerDelegate, UARTPeripheralDelegate>
 
 @end

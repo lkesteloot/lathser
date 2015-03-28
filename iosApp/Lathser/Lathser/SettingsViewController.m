@@ -1,5 +1,5 @@
 //
-//  AppDelegate.h
+//  SettingsViewController.m
 //  Lathser
 //
 //  Created by Kurt Schaefer on 4/13/14.
@@ -16,12 +16,25 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
-//
 
-#import <UIKit/UIKit.h>
+#import "SettingsViewController.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface SettingsViewController ()
 
-@property (strong, nonatomic) UIWindow *window;
+@end
+
+@implementation SettingsViewController
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+	// Do any additional setup after loading the view, typically from a nib.
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
 @end
