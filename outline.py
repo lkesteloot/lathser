@@ -93,7 +93,7 @@ SVG_HEIGHT = 20*DPI
 # Output file type.
 OUTPUT_EXTENSION = "svg"
 OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
-OUTPUT_EXTENSION = "prn"     # For direct printing
+#OUTPUT_EXTENSION = "prn"     # For direct printing
 
 # We can only output integers, so we translate to a much higher DPI.
 VECTOR_DPI = 1200
@@ -535,24 +535,26 @@ def transform_vertices(vertices, transform, scale):
 # Go to the spot that indicates to the hardware that it should advance to
 # the next step.
 def make_heat_sensor():
-    x = 2.5*DPI
-    y = 3.0*DPI
+    x = 3.0*DPI
+    y = 2.5*DPI
     radius = DPI/32.0
     pointCount = 10
 
     points = []
 
-    for i in range(pointCount + 1):
-        t = float(i)/pointCount*math.pi*2
-        points.append(Vector2(x + math.cos(t)*radius, y + math.sin(t)*radius))
+    points.append(Vector2(x, y - 1))
+    points.append(Vector2(x, y))
+#    for i in range(pointCount + 1):
+#        t = float(i)/pointCount*math.pi*2
+#        points.append(Vector2(x + math.cos(t)*radius, y + math.sin(t)*radius))
 
     return [points]
 
 # Go far away to give the hardware a chance to rotate.
 def make_time_waster():
-    x = (SVG_WIDTH - 2)*DPI
-    y = 3.0*DPI
-    radius = DPI/32.0
+    x = 10*DPI
+    y = 2.5*DPI
+    radius = DPI
     pointCount = 10
 
     points = []
@@ -586,7 +588,7 @@ def generate_vector(out, paths):
             command = "M" if index == 0 else "L"
             x = int(vertex.x*VECTOR_DPI/DPI)
             y = int(vertex.y*VECTOR_DPI/DPI)
-            out.write("%s%d,%d\n" % (command, x, y))
+            out.write("%s%d,%d\n" % (command, y, x))
     out.write("X\n")
 
 def generate_prn(out, paths, title):
@@ -671,7 +673,9 @@ def main():
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
             for angle in half_list(angles(ANGLE_COUNT)):
-                thetas_file.write("%g\n" % angle)
+                # For now we use this format to make it easy to copy/paste into xcode.
+                # Eventually we can send these via deep link or something.
+                thetas_file.write("        @%g,\n" % angle)
                 if GENERATE_LIT_VERSION:
                     image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
                     image.save("out%02d.png" % index)

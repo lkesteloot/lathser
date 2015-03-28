@@ -9,6 +9,7 @@
 #import "UARTPeripheral.h"
 #import "JogViewController.h"
 #import "DialView.h"
+#import "ThermalSensorView.h"
 
 typedef NS_ENUM(NSInteger, JogConnectionState) {
     JogConnectionStateNotConnected = 0,
@@ -26,11 +27,8 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 @property (nonatomic, strong) UARTPeripheral* currentPeripheral;
 @property (nonatomic, assign) JogConnectionState connectionState;
 
-
 @property (nonatomic, strong) IBOutlet DialView* dialView;
-@property (nonatomic, strong) IBOutlet UIView* thermalSensorView;
-@property (nonatomic, strong) IBOutlet UIImageView* thermalSensorImageView;
-
+@property (nonatomic, strong) IBOutlet ThermalSensorView* thermalSensorView;
 
 @property (nonatomic, strong) NSMutableArray* positions;
 
@@ -49,15 +47,31 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
         self.positions = [[NSMutableArray alloc] init];
 
         // Temp hard coded sequence for knight.
-        [self.positions addObject:@(0.0f)];
-        [self.positions addObject:@(1*M_PI/8.0)];
-        [self.positions addObject:@(2*M_PI/8.0)];
-        [self.positions addObject:@(3*M_PI/8.0)];
-        [self.positions addObject:@(4*M_PI/8.0)];
-        [self.positions addObject:@(5*M_PI/8.0)];
-        [self.positions addObject:@(6*M_PI/8.0)];
-        [self.positions addObject:@(7*M_PI/8.0)];
-        [self.positions addObject:@(6*M_PI/8.0 + 9*M_PI/8.0)];
+        [self.positions addObjectsFromArray:
+         @[@0,
+           @0.392699,
+           @0.785398,
+           @1.1781,
+           @1.5708,
+           @1.9635,
+           @2.35619,
+           @2.74889,
+           @0,
+           @0.392699,
+           @0.785398,
+           @1.1781,
+           @1.5708,
+           @1.9635,
+           @2.35619,
+           @2.74889,
+           @0,
+           @0.392699,
+           @0.785398,
+           @1.1781,
+           @1.5708,
+           @1.9635,
+           @2.35619,
+           @2.74889]];
     }
     return self;
 }
@@ -166,51 +180,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     [self sendString:@"n"];
 }
 
-
-- (UIColor *)interpColorFrom:(UIColor*)fromColor
-                        to:(UIColor *)toColor
-              t:(float)t
-{
-    if (t < 0.0f) {
-        return fromColor;
-    }
-    if (t > 1.0f) {
-        return toColor;
-    }
-
-    const CGFloat *fromComponents = CGColorGetComponents(fromColor.CGColor);
-    const CGFloat *toComponents = CGColorGetComponents(toColor.CGColor);
-
-    float r = fromComponents[0] + (toComponents[0] - fromComponents[0])*t;
-    float g = fromComponents[1] + (toComponents[1] - fromComponents[1])*t;
-    float b = fromComponents[2] + (toComponents[2] - fromComponents[2])*t;
-
-    return [UIColor colorWithRed:r green:g blue:b alpha:1.0];
-}
-
-- (void)updateThermalSensorColor:(NSInteger)value
-{
-    UIColor* bottomColor = [UIColor colorWithRed:93.0/255.0
-                                           green:157.0/255.0
-                                            blue:73.0/255.0 alpha:1.0];
-    UIColor* middleColor = [UIColor colorWithRed:219.0/255.0
-                                           green:217.0/255.0
-                                            blue:74.0/255.0 alpha:1.0];
-    UIColor* topColor = [UIColor colorWithRed:218.0/255.0
-                                        green:78.0/255.0
-                                         blue:68.0/255.0 alpha:1.0];
-
-    CGFloat ratio = (CGFloat)value/1024.0f;
-    UIColor* color = bottomColor;
-
-    if (ratio < 0.5) {
-        color = [self interpColorFrom:bottomColor to:middleColor t:ratio*2.0];
-    } else {
-        color = [self interpColorFrom:middleColor to:topColor t:ratio*2.0 - 1.0];
-    }
-    self.thermalSensorView.backgroundColor = color;
-}
-
 - (void)updateConnectionStateLabel
 {
     if (self.connectionState == JogConnectionStateConnected) {
@@ -249,7 +218,7 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     // We put this to white if we're disconnected so we don't show a misleading
     // green light.
     if (self.connectionState != JogConnectionStateConnected) {
-        self.thermalSensorView.backgroundColor = [UIColor whiteColor];
+        self.thermalSensorView.value = 1;
     }
 }
 
@@ -411,14 +380,13 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
     if (stringComponents.count == 1) {
         NSString* command = [stringComponents objectAtIndex:0];
         if ([command isEqualToString:@"THERM"]) {
-            // TODO: Indicate thermal pulse, hopefully by drawing an expanding ring
-            // out of the thermal sensor display.
+            [self.thermalSensorView drawPulseWithDuration:0.3];
         }
     } else if (stringComponents.count == 2) {
         NSString* command = [stringComponents objectAtIndex:0];
         NSString* arg = [stringComponents objectAtIndex:1];
         if ([command isEqualToString:@"TEMP"]) {
-            [self updateThermalSensorColor:[arg integerValue]];
+            self.thermalSensorView.value = [arg integerValue];
         } else if ([command isEqualToString:@"RUN"]) {
             NSInteger newIndex = [arg integerValue];
             if (newIndex >= 0 && newIndex < self.positions.count) {
