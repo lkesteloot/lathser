@@ -127,3 +127,8 @@ class Vector3(object):
         x, y = transform.transform(ry, rz)
 
         return Vector2(x, y)
+
+    # Return a copy of the vertex rotated 90 degrees around the X axis. This is for
+    # converting models from around-Y to around-Z.
+    def rotatex90(self):
+        return Vector3(self.x, -self.z, self.y)

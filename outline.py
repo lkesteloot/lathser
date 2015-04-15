@@ -250,6 +250,11 @@ class Triangle3D(object):
     def project(self, transform, angle):
         return Triangle2D([vertex.project(transform, angle) for vertex in self.vertices])
 
+    # Return a copy of the triangle rotated 90 degrees around the X axis. This is for
+    # converting models from around-Y to around-Z.
+    def rotatex90(self):
+        return Triangle3D([v.rotatex90() for v in self.vertices])
+
     # Translate this triangle by the vector.
     def __add__(self, vector3):
         return Triangle3D([v + vector3 for v in self.vertices])
@@ -623,9 +628,20 @@ def generate_file(basename, paths):
 
 def main():
     filename = "data/new_knight_baseclean_sym.json"
+    model_is_around_y = True
 
     triangles = loadFile(filename)
     print "The model has %d triangles." % len(triangles)
+
+    if model_is_around_y:
+        # We need the model to be around Z. If it's around Y, transform the initial
+        # geometry so that the rest of the program doesn't have to concern itself with it.
+
+        # XXX I don't know why I have to do this 3 times. I should actually visualize these
+        # models so I'm not guessing.
+        triangles = [triangle.rotatex90() for triangle in triangles]
+        triangles = [triangle.rotatex90() for triangle in triangles]
+        triangles = [triangle.rotatex90() for triangle in triangles]
 
     # Single image.
     if False:
