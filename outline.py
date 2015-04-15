@@ -70,7 +70,7 @@ GENERATE_SINGLE_FILE = True
 GENERATE_SINGLE_PATH = False
 
 # Whether to also generate a lit version of the raster.
-GENERATE_LIT_VERSION = False
+GENERATE_LIT_VERSION = True
 
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
@@ -81,7 +81,7 @@ PASS_SHADES = [80, 40, 0]
 KERF_RADIUS_IN = 0.002
 
 # Extra spacing for rough cuts, in inches.
-ROUGH_EXTRA_IN = 1/8.0
+ROUGH_EXTRA_IN = 1/16.0
 
 # Dots per inch in the SVG file. Don't change this.
 DPI = 72
@@ -431,6 +431,9 @@ def get_outlines(image):
             if this != down:
                 edges.append(Edge(Vector2(x, y + 1), Vector2(x + 1, y + 1)))
     print "Made %d edges." % len(edges)
+    if not edges:
+        print "Error: Found no pixels in image."
+        sys.exit(1)
 
     # Put into a hash by the edges.
     print "Hashing edges..."
@@ -619,7 +622,7 @@ def generate_file(basename, paths):
     print "Generated \"%s\"." % filename
 
 def main():
-    filename = "data/knight.json"
+    filename = "data/new_knight_baseclean_sym.json"
 
     triangles = loadFile(filename)
     print "The model has %d triangles." % len(triangles)
@@ -678,8 +681,9 @@ def main():
                 thetas_file.write("        @%g,\n" % angle)
                 if GENERATE_LIT_VERSION:
                     image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
-                    image.save("out%02d.png" % index)
+                    image.save("out%02d-lit.png" % index)
                 image, transform = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, None)
+                image.save("out%02d-render.png" % index)
                 add_base(image)
 
                 # Add the shade (for spiraling). The "transform" converts from
@@ -688,6 +692,7 @@ def main():
                 shade_width = int(ROD_DIAMETER*shade_percent/100.0*transform.scale/scale*DPI)
                 shade_center_x = int(transform.offx)
                 add_shade(image, shade_width, shade_center_x)
+                image.save("out%02d-shade.png" % index)
 
                 # Expand to take into account the kerf.
                 kerf_radius = KERF_RADIUS_IN*transform.scale/scale*DPI
@@ -695,6 +700,7 @@ def main():
                     # Rough cut, add some spacing so we don't char the wood.
                     kerf_radius += ROUGH_EXTRA_IN*transform.scale/scale*DPI
                 image = add_kerf(image, kerf_radius)
+                image.save("out%02d-kerf.png" % index)
 
                 if GENERATE_SINGLE_PATH:
                     # Make sure the top is clear so that we don't split the path.
