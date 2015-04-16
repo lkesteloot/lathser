@@ -75,6 +75,7 @@ GENERATE_LIT_VERSION = True
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 40, 0]
+PASS_SHADES = [40, 20, 0]
 # PASS_SHADES = [0]
 
 # The radius of the laser kerf, in inches.
@@ -243,7 +244,9 @@ class Triangle3D(object):
         # Compute normal.
         v1 = vertices[0] - vertices[2]
         v2 = vertices[0] - vertices[1]
-        self.normal = v1.cross(v2).normalized()
+        self.normal = v1.cross(v2)
+        if self.normal.length() != 0:
+            self.normal = self.normal.normalized()
 
     # Rotate this 3D triangle by angle, transform it, project it onto 2D, and return
     # a 2D triangle.
@@ -628,19 +631,17 @@ def generate_file(basename, paths):
 
 def main():
     filename = "data/new_knight_baseclean_sym.json"
-    model_is_around_y = True
+    rotation_count = 3
+
+    filename = "data/DNA.json"
+    rotation_count = 2
 
     triangles = loadFile(filename)
     print "The model has %d triangles." % len(triangles)
 
-    if model_is_around_y:
+    for i in range(rotation_count):
         # We need the model to be around Z. If it's around Y, transform the initial
         # geometry so that the rest of the program doesn't have to concern itself with it.
-
-        # XXX I don't know why I have to do this 3 times. I should actually visualize these
-        # models so I'm not guessing.
-        triangles = [triangle.rotatex90() for triangle in triangles]
-        triangles = [triangle.rotatex90() for triangle in triangles]
         triangles = [triangle.rotatex90() for triangle in triangles]
 
     # Single image.
