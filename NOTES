@@ -1,5 +1,14 @@
 
 To do next:
+    - Cut both sides:
+        - 0
+        - 180
+        - 180 + 1/16
+        - 0 + 1/16
+        - ...
+    - Get zero point correct.
+    - Graph temperature.
+    - Try DNA.
     - Write simulator of cuts as a web page.
     - Increase kerf to get better ears.
     - Try output from ctrl-cut.

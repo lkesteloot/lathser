@@ -1,0 +1,1 @@
+cp out.prn /Volumes/LAWRENCEUSB/pythong && diskutil eject /Volumes/LAWRENCEUSB

@@ -53,7 +53,9 @@ TARGET = TARGET_VIEW
 # the rod at 1.25 inches from the left, and the laser
 # cutter itself considers "0" to be about 0.045 inches
 # from the left.
-FINAL_X = 1.25 - 0.045
+OFFSET_X = 0.045
+OFFSET_X = 0.142 - 0.2
+FINAL_X = 1.25 - OFFSET_X
 FINAL_Y = 1
 
 # Base raster image size. Scaled by RENDER_SCALE.
@@ -70,12 +72,12 @@ GENERATE_SINGLE_FILE = True
 GENERATE_SINGLE_PATH = False
 
 # Whether to also generate a lit version of the raster.
-GENERATE_LIT_VERSION = True
+GENERATE_LIT_VERSION = False
 
 # The various passes we want to make to spiral into the center, in
 # percentages of the whole. Make sure that the last entry is 0.
 PASS_SHADES = [80, 40, 0]
-PASS_SHADES = [40, 20, 0]
+# PASS_SHADES = [40, 20, 0]
 # PASS_SHADES = [0]
 
 # The radius of the laser kerf, in inches.
@@ -92,9 +94,9 @@ SVG_WIDTH = 32*DPI
 SVG_HEIGHT = 20*DPI
 
 # Output file type.
-OUTPUT_EXTENSION = "svg"
-OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
-#OUTPUT_EXTENSION = "prn"     # For direct printing
+OUTPUT_EXTENSION = "svg"     # For Illustrator
+# OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
+OUTPUT_EXTENSION = "prn"     # For direct printing
 
 # We can only output integers, so we translate to a much higher DPI.
 VECTOR_DPI = 1200
@@ -357,19 +359,17 @@ def add_shade(image, shade_width, shade_center_x):
     width, height = image.size
     start_x = shade_center_x - shade_width/2
 
-    # Start at 2 so that the path can trace it. For some reason 1
-    # does not work.
-    for y in range(2, height):
+    for y in range(height):
         for x in range(shade_width):
             image.putpixel((start_x + x, y), RASTER_WHITE)
 
 # Clear the top "size" pixels of the image.
-def clear_top(image, size):
+def clear_top(image, size, color):
     width, height = image.size
 
     for y in range(0, size):
         for x in range(width):
-            image.putpixel((x, y), RASTER_BLACK)
+            image.putpixel((x, y), color)
 
 # Extend the shape in the image by the radius and return the new image.
 def add_kerf(image, radius):
@@ -420,6 +420,10 @@ def angles(count):
 # Return the first half of the list.
 def half_list(lst):
     return lst[:len(lst)/2]
+
+# Return a list of (bool,item) pairs where bool is true only for the last item.
+def identify_last(lst):
+    return [(index == len(lst) - 1, item) for index, item in enumerate(lst)]
 
 # Return a list of paths of Vector2() for this image.
 def get_outlines(image):
@@ -553,7 +557,7 @@ def make_heat_sensor():
 
     points = []
 
-    points.append(Vector2(x, y - 1))
+    points.append(Vector2(x, y - 2))
     points.append(Vector2(x, y))
 #    for i in range(pointCount + 1):
 #        t = float(i)/pointCount*math.pi*2
@@ -562,10 +566,13 @@ def make_heat_sensor():
     return [points]
 
 # Go far away to give the hardware a chance to rotate.
-def make_time_waster():
+def make_time_waster(long_delay):
     x = 10*DPI
     y = 2.5*DPI
-    radius = DPI
+    if long_delay:
+        radius = DPI*0.25
+    else:
+        radius = DPI*0.125
     pointCount = 10
 
     points = []
@@ -630,11 +637,17 @@ def generate_file(basename, paths):
     print "Generated \"%s\"." % filename
 
 def main():
-    filename = "data/new_knight_baseclean_sym.json"
-    rotation_count = 3
+    model = 1
 
-    filename = "data/DNA.json"
-    rotation_count = 2
+    if model == 0:
+        filename = "data/knight.json"
+        rotation_count = 0
+    elif model == 1:
+        filename = "data/new_knight_baseclean_sym.json"
+        rotation_count = 3
+    elif model == 2:
+        filename = "data/DNA.json"
+        rotation_count = 2
 
     triangles = loadFile(filename)
     print "The model has %d triangles." % len(triangles)
@@ -692,7 +705,7 @@ def main():
         for pass_number, shade_percent in enumerate(PASS_SHADES):
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
-            for angle in half_list(angles(ANGLE_COUNT)):
+            for is_last, angle in identify_last(half_list(angles(ANGLE_COUNT))):
                 # For now we use this format to make it easy to copy/paste into xcode.
                 # Eventually we can send these via deep link or something.
                 thetas_file.write("        @%g,\n" % angle)
@@ -717,11 +730,12 @@ def main():
                     # Rough cut, add some spacing so we don't char the wood.
                     kerf_radius += ROUGH_EXTRA_IN*transform.scale/scale*DPI
                 image = add_kerf(image, kerf_radius)
-                image.save("out%02d-kerf.png" % index)
 
-                if GENERATE_SINGLE_PATH:
-                    # Make sure the top is clear so that we don't split the path.
-                    clear_top(image, 2)
+                # Cut off the sides when we're shading.
+                if shade_percent > 0:
+                    clear_top(image, 2, RASTER_WHITE)
+
+                image.save("out%02d-kerf.png" % index)
 
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
@@ -737,7 +751,7 @@ def main():
                     else:
                         all_paths.extend(paths)
                         all_paths.extend(make_heat_sensor())
-                        all_paths.extend(make_time_waster())
+                        all_paths.extend(make_time_waster(is_last))
                 else:
                     generate_file("out%02d" % index, paths)
                 index += 1
