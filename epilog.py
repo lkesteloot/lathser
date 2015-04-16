@@ -254,8 +254,16 @@ def generate_prn(out, doc):
         pass
 
     if enableCut:
+        # Header for the cut.
+        out.write(HPGL_START)
+        out.write(V_INIT)
+        out.write(SEP)
+
         for cut in doc.getCuts():
             generate_cut(out, cut)
+
+        # Footer for the cut.
+        out.write(HPGL_END)
 
     out.write(HPGL_START)
     out.write(HPGL_PEN_UP)
@@ -280,14 +288,7 @@ def generate_cut(out, cut):
     # We cut the points into spans of at most 100 points.
     for spanIndex, points in enumerate(cut.getSpans(100)):
         print "Span %d with %d points" % (spanIndex, len(points))
-        # Separate the spans.
-        if spanIndex > 0:
-            out.write(SEP)
 
-        # Header for the cut.
-        out.write(HPGL_START)
-        out.write(V_INIT)
-        out.write(SEP)
         out.write(V_POWER % power_set)
         out.write(SEP)
         out.write(V_SPEED % speed_set)
@@ -311,7 +312,4 @@ def generate_cut(out, cut):
         out.write(HPGL_PEN_DOWN)
         out.write(",".join("%d,%d" % (p.x, p.y) for p in restPoints))
         out.write(SEP)
-
-        # Footer for the cut.
-        out.write(HPGL_END)
 
