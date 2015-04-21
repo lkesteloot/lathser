@@ -637,7 +637,7 @@ def generate_file(basename, paths):
     print "Generated \"%s\"." % filename
 
 def main():
-    model = 1
+    model = 0
 
     if model == 0:
         filename = "data/knight.json"
@@ -699,16 +699,19 @@ def main():
 
         all_paths = []
 
+        # We write out the theta's in a deep link format.  Once we have better file naming
+        # we could provide a better name than "fromlink" which is only to distinguish it from
+        # Default.
         thetas_file = open("thetas.txt", "w")
+        thetas_file.write("lathser://sequence/add?name=fromlink")
 
         index = 0
         for pass_number, shade_percent in enumerate(PASS_SHADES):
             print "------------------ Making pass %d (%d%%)" % (pass_number, shade_percent)
 
             for is_last, angle in identify_last(half_list(angles(ANGLE_COUNT))):
-                # For now we use this format to make it easy to copy/paste into xcode.
-                # Eventually we can send these via deep link or something.
-                thetas_file.write("        @%g,\n" % angle)
+                # We append these into a deep link that can be fed into the app.
+                thetas_file.write("&%g" % angle)
                 if GENERATE_LIT_VERSION:
                     image, _ = render(triangles, IMAGE_SIZE*RENDER_SCALE, IMAGE_SIZE*RENDER_SCALE, angle, light)
                     image.save("out%02d-lit.png" % index)
