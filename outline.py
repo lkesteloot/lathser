@@ -53,8 +53,7 @@ TARGET = TARGET_VIEW
 # the rod at 1.25 inches from the left, and the laser
 # cutter itself considers "0" to be about 0.045 inches
 # from the left.
-OFFSET_X = 0.045
-OFFSET_X = 0.142 - 0.2
+OFFSET_X = -0.031
 FINAL_X = 1.25 - OFFSET_X
 FINAL_Y = 1
 

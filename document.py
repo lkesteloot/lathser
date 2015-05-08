@@ -1,14 +1,19 @@
 
 # Encapsulates a document to be printed to the laser printer.
 
-class Document:
+class Document(object):
     def __init__(self, title):
         self.title = title
         self.cuts = []
+        self.rasters = []
 
     # Object of the Cut class.
     def addCut(self, cut):
         self.cuts.append(cut)
+
+    # Object of the Raster class.
+    def addRaster(self, raster):
+        self.rasters.append(raster)
 
     # Pixels per inch.
     def getResolution(self):
@@ -18,13 +23,13 @@ class Document:
         # Match Fusion default.
         return 600
 
+    # Whether this doc has engravings (raster).
     def getEnableEngraving(self):
-        # We don't support engraving (raster mode).
-        return False
+        return len(self.rasters) > 0
 
+    # Whether this doc has cuts (vector).
     def getEnableCut(self):
-        # We only support cutting (vector mode).
-        return True
+        return len(self.cuts) > 0
 
     def getCenterEngrave(self):
         # We never center anything automatically.
@@ -53,4 +58,7 @@ class Document:
 
     def getCuts(self):
         return self.cuts
+
+    def getRasters(self):
+        return self.rasters
 
