@@ -108,7 +108,6 @@
         UIView* markView = [self createDialMarkView:[theta floatValue]];
         [self.dialMarkContainerView addSubview:markView];
         [self.markViews addObject:markView];
-        [self addSubview:markView];
     }
 }
 
@@ -126,6 +125,27 @@
 - (void)rotateImage:(UIImageView *)image duration:(NSTimeInterval)duration
               curve:(int)curve radians:(CGFloat)radians
 {
+#if 0
+    NSString *zRotationKeyPath = @"transform.rotation.z"; // The killer of typos
+
+    // Change the model to the new "end value" (key path can work like this but properties don't)
+    CGFloat currentAngle = [[self.handImageView.layer valueForKeyPath:zRotationKeyPath] floatValue];
+    CGFloat angleToAdd = radians - currentAngle;
+    NSLog(@"currentAngle: %g angleToAdd: %g", currentAngle, angleToAdd);
+
+    [self.handImageView.layer setValue:@(currentAngle+angleToAdd) forKeyPath:zRotationKeyPath];
+
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:zRotationKeyPath];
+    animation.duration = duration;
+
+    animation.toValue = @(0.0);        // model value was already changed. End at that value
+    animation.byValue = @(angleToAdd); // start from - this value (it's toValue - byValue (see above))
+
+    // Add the animation. Once it completed it will be removed and you will see the value
+    // of the model layer which happens to be the same value as the animation stopped at.
+    [self.handImageView.layer addAnimation:animation forKey:@"handRotation"];
+#endif
+
     // Setup the animation
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:duration];

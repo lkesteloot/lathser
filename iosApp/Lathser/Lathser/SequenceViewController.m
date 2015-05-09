@@ -22,6 +22,7 @@
 #import "SequenceViewController.h"
 #import "DialView.h"
 #import "ThermalSensorView.h"
+#import "LSNotifcationCenter.h"
 
 typedef NS_ENUM(NSInteger, JogConnectionState) {
     JogConnectionStateNotConnected = 0,
@@ -36,6 +37,11 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 @property (weak, nonatomic) IBOutlet UIButton *connectionButton;
 @property (weak, nonatomic) IBOutlet UILabel *connectionStatusLabel;
 
+@property (weak, nonatomic) IBOutlet UILabel *sequenceNameLabel;
+@property (weak, nonatomic) IBOutlet UILabel *currentStepLabel;
+@property (weak, nonatomic) IBOutlet UILabel *totalStepsLabel;
+@property (weak, nonatomic) IBOutlet UIProgressView *progressView;
+
 @property (nonatomic, strong) UARTPeripheral* currentPeripheral;
 @property (nonatomic, assign) JogConnectionState connectionState;
 
@@ -43,6 +49,7 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 @property (nonatomic, strong) IBOutlet ThermalSensorView* thermalSensorView;
 
 @property (nonatomic, strong) NSMutableArray* positions;
+@property (nonatomic, strong) NSString *sequenceName;
 
 @end
 
@@ -55,6 +62,8 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     if (self) {
         self.cbManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         self.connectionState = JogConnectionStateNotConnected;
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sequenceURLNotification:) name:kSequenceUrlNotification object:nil];
 
         self.positions = [[NSMutableArray alloc] init];
 
@@ -84,7 +93,9 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
            @1.9635,
            @2.35619,
            @2.74889]];
+        self.sequenceName = @"Default";
     }
+
     return self;
 }
 
@@ -155,6 +166,9 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     // Quit whatever we were doing.
     [self sendString:@"q"];
 
+    // Kill off any existing sequence values.
+    [self sendString:@"x"];
+
     // Do an "a800 " style adding of each of the coordinates.
     // The positions are sent in steps.
     for (NSNumber* number in self.positions) {
@@ -164,6 +178,11 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     // start the sequence, moving to the first location and
     // waiting for the thermal sensor.
     [self sendString:@"s"];
+
+    // Send should do a better job of indicating that things need to be sent/have been sent.
+    self.dialView.currentPositionIndex = 0;
+    [self updateProgressBarAndLabels];
+    self.sequenceNameLabel.text = self.sequenceName;
 }
 
 - (IBAction)sendSequenceButtonTouchUpinside:(id)sender
@@ -175,10 +194,13 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 - (IBAction)previousButtonTouchUpInside:(id)sender
 {
     // It would be nice to have a "heading to"
-    // indication that comes up right away.
-//    if (self.dialView.currentPositionIndex > 0) {
-//        self.dialView.currentPositionIndex--;
-//    }
+    // indication that comes up right away, but for now just for preview
+    // we let you step through things when not connected.
+    if (self.connectionState != JogConnectionStateConnected &&
+        self.dialView.currentPositionIndex > 0) {
+        self.dialView.currentPositionIndex--;
+        [self updateProgressBarAndLabels];
+    }
     [self sendString:@"p"];
 }
 
@@ -186,9 +208,11 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 {
     // It would be nice to have a "heading to"
     // indication that comes up right away.
-//    if (self.dialView.currentPositionIndex + 1 < self.positions.count) {
-//        self.dialView.currentPositionIndex++;
-//    }
+    if (self.connectionState != JogConnectionStateConnected &&
+        self.dialView.currentPositionIndex + 1 < self.positions.count) {
+        self.dialView.currentPositionIndex++;
+        [self updateProgressBarAndLabels];
+    }
     [self sendString:@"n"];
 }
 
@@ -216,6 +240,14 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     } else {
         NSAssert(FALSE, @"Unknown connection state: %d", (int)self.connectionState);
     }
+}
+
+- (void)updateProgressBarAndLabels
+{
+    NSInteger index = self.dialView.currentPositionIndex;
+    [self.progressView setProgress:(float)index/(float)(self.positions.count - 1) animated:YES];
+    self.currentStepLabel.text = [NSString stringWithFormat:@"%ld", index + 1];
+    self.totalStepsLabel.text = [NSString stringWithFormat:@"%ld", self.positions.count];
 }
 
 - (void)setConnectionState:(JogConnectionState)connectionState
@@ -291,6 +323,30 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     [self sendString:@"s"];
 }
 
+- (void)sequenceURLNotification:(NSNotification*)notification
+{
+    NSURL *url = [notification object];
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    NSArray *queryItems = urlComponents.queryItems;
+
+    NSMutableArray* positions = [[NSMutableArray alloc] init];
+
+    for (NSURLQueryItem *item in queryItems) {
+        if ([item.name isEqualToString:@"name"]) {
+            self.sequenceName = [item.value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        } else if (!item.value) {
+            // All the point values have empty names.
+            [positions addObject:[NSNumber numberWithFloat:[item.name floatValue]]];
+        }
+    }
+
+    if (positions.count > 0) {
+        self.positions = positions;
+        self.dialView.positionArry = positions;
+        self.sequenceNameLabel.text = self.sequenceName;
+        [self sendAndStartCurrentSequence];
+    }
+}
 
 #pragma mark CBCentralManagerDelegate
 - (void)centralManagerDidUpdateState:(CBCentralManager*)central
@@ -403,6 +459,7 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
             NSInteger newIndex = [arg integerValue];
             if (newIndex >= 0 && newIndex < self.positions.count) {
                 self.dialView.currentPositionIndex = [arg integerValue];
+                [self updateProgressBarAndLabels];
             }
         } else if ([command isEqualToString:@"POS"]) {
             // Not sure what to do about it saying exactly where it is.

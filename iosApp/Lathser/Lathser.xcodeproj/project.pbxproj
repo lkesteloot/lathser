@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		450D906F1AE49B770029C952 /* LSNotifcationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 450D906E1AE49B770029C952 /* LSNotifcationCenter.m */; };
 		453B3E371AC6596700358F2D /* appIcon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 453B3E2F1AC6596700358F2D /* appIcon-76@2x.png */; };
 		453B3E381AC6596700358F2D /* appIcon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = 453B3E301AC6596700358F2D /* appIcon-76.png */; };
 		453B3E391AC6596700358F2D /* appIcon-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 453B3E311AC6596700358F2D /* appIcon-40.png */; };
@@ -66,6 +67,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		450D906D1AE49B770029C952 /* LSNotifcationCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSNotifcationCenter.h; sourceTree = "<group>"; };
+		450D906E1AE49B770029C952 /* LSNotifcationCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSNotifcationCenter.m; sourceTree = "<group>"; };
 		453B3E2F1AC6596700358F2D /* appIcon-76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "appIcon-76@2x.png"; path = "Assets/appIcon-76@2x.png"; sourceTree = "<group>"; };
 		453B3E301AC6596700358F2D /* appIcon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "appIcon-76.png"; path = "Assets/appIcon-76.png"; sourceTree = "<group>"; };
 		453B3E311AC6596700358F2D /* appIcon-40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "appIcon-40.png"; path = "Assets/appIcon-40.png"; sourceTree = "<group>"; };
@@ -201,6 +204,8 @@
 				45EBAD921AC4F0CB00D750C7 /* ThermalSensorView.m */,
 				45910B9918FB3D260059CFF9 /* Images.xcassets */,
 				45910B8218FB3D260059CFF9 /* Supporting Files */,
+				450D906D1AE49B770029C952 /* LSNotifcationCenter.h */,
+				450D906E1AE49B770029C952 /* LSNotifcationCenter.m */,
 			);
 			path = Lathser;
 			sourceTree = "<group>";
@@ -398,6 +403,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				450D906F1AE49B770029C952 /* LSNotifcationCenter.m in Sources */,
 				45EBAD931AC4F0CB00D750C7 /* ThermalSensorView.m in Sources */,
 				45D480C61ABDF59B009D3AE8 /* DialView.m in Sources */,
 				45910B9818FB3D260059CFF9 /* SettingsViewController.m in Sources */,

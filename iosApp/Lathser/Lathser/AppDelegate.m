@@ -18,6 +18,7 @@
 //   limitations under the License.
 
 #import "AppDelegate.h"
+#include "LSNotifcationCenter.h"
 
 @implementation AppDelegate
 
@@ -52,6 +53,21 @@
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    // lathser://sequence/add?name=knight&-0.32&0.32&0.62
+    if ([[url host] isEqualToString:@"sequence"]) {
+        if ([[url path] isEqualToString:@"/add"]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kSequenceUrlNotification
+                                                                    object:url];
+            });
+        }
+    }
+
+    return FALSE;
 }
 
 @end
