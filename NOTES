@@ -68,3 +68,24 @@ Models:
     - My_Scan_1: http://www.thingiverse.com/thing:221556/#files (high-res)
     - DNA: https://grabcad.com/library/dynamic-dna
 
+Web rewrite:
+
+    - Table stakes:
+        - Load model from JSON.
+        - Add bbox stuff (2D and 3D).
+        - Render (lit).
+        - Render (unlit).
+        - Add shade (spiral).
+        - Add base.
+        - Add kerf.
+        - Generate outlines.
+        - Simplify vertices.
+        - Transform vertices.
+        - General PRN.
+        - Generate SVG.
+    - Also:
+        - Load model from Dropbox or web.
+        - Save PRN or SVG to Dropbox or download.
+        - Display model in 3D.
+        - Display paths and cuts in 3D.
+
