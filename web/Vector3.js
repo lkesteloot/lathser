@@ -2,7 +2,7 @@
 
 'use strict';
 
-define([], function () {
+define(["Vector2"], function (Vector2) {
     var Vector3 = function (x, y, z) {
         this.x = x;
         this.y = y;
@@ -69,19 +69,19 @@ define([], function () {
     };
 
     // Rotate the 3D vector around the Z axis by "angle", then project on the X
-    // plane.
+    // plane. Returns a Vector2.
     Vector3.prototype.project = function (transform, angle) {
         // Rotate around Z axis.
         var rx = Math.cos(angle)*this.x - Math.sin(angle)*this.y;
         var ry = Math.sin(angle)*this.x + Math.cos(angle)*this.y;
         var rz = this.z;
 
-        return transform.transform(ry, rz);
+        return transform.transform(new Vector2(ry, rz));
     };
 
     // Return a copy of the vertex rotated 90 degrees around the X axis. This is for
     // converting models from around-Y to around-Z.
-    Vector3.prototype.rotatex90 = function () {
+    Vector3.prototype.rotateX90 = function () {
         return new Vector3(this.x, -this.z, this.y);
     };
 

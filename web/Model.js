@@ -47,11 +47,22 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3"], function ($, _,
             }
 
             Array.prototype.push.apply(triangles, _.map(rawFaces, function (face) {
-                return new Triangle3D(
+                return new Triangle3D([
                     vertices[face[0]],
                     vertices[face[1]],
-                    vertices[face[2]]);
+                    vertices[face[2]]]);
             }));
+        });
+
+        // XXX Model-dependant. Not sure where to store this.
+        var rotationCount = 3;
+        // We need the model to be around Z. If it's around Y, transform
+        // the initial geometry so that the rest of the program doesn't
+        // have to concern itself with it.
+        _.times(rotationCount, function () {
+            triangles = _.map(triangles, function (triangle) {
+                return triangle.rotateX90();
+            });
         });
 
         return new Model(triangles);

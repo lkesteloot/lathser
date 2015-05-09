@@ -17,6 +17,7 @@ import sys
 import json
 import math
 import collections
+import time
 
 # pip install Pillow (https://python-pillow.github.io/)
 from PIL import Image, ImageDraw
@@ -197,7 +198,7 @@ class BoundingBox2D(object):
         return self.min + self.size()/2
 
     def __str__(self):
-        return "BBOX([%g,%g,%g] - [%g,%g,%g])" % (self.min.x, self.min.y, self.max.x, self.max.y)
+        return "BBOX([%g,%g] - [%g,%g])" % (self.min.x, self.min.y, self.max.x, self.max.y)
 
 # 3D bounding box.
 class BoundingBox3D(object):
@@ -657,10 +658,14 @@ def main():
         triangles = [triangle.rotatex90() for triangle in triangles]
 
     # Single image.
-    if False:
-        img, _ = render(triangles, 1024, 1024, 0)
-        add_base(img)
+    if True:
+        img, _ = render(triangles, 1024, 1024, 0, None)
+        # add_base(img)
+        before = time.time()
         img.save("out.png")
+        after = time.time()
+        print "%dms" % ((after - before)*1000)
+        sys.exit(0)
 
     # Animated GIF.
     if False:

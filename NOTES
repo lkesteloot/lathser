@@ -71,8 +71,8 @@ Models:
 Web rewrite:
 
     - Table stakes:
-        - Load model from JSON.
-        - Add bbox stuff (2D and 3D).
+        * Load model from JSON.
+        * Add bbox stuff (2D and 3D).
         - Render (lit).
         - Render (unlit).
         - Add shade (spiral).
