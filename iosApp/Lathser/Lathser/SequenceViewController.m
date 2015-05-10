@@ -38,9 +38,11 @@
 
 @property (nonatomic, strong) IBOutlet DialView* dialView;
 @property (nonatomic, strong) IBOutlet ThermalSensorView* thermalSensorView;
+@property (nonatomic, strong) IBOutlet UIButton *sendSequenceButton;
 
 @property (nonatomic, strong) NSMutableArray* positions;
 @property (nonatomic, strong) NSString *sequenceName;
+@property (nonatomic, assign) BOOL isSendingSequence;
 
 @end
 
@@ -151,17 +153,24 @@
     self.sequenceNameLabel.text = @"Sending...";
     self.progressView.progress = 0;
 
+    // Disable this while we're trying to send the sequence.
+    self.sendSequenceButton.enabled = FALSE;
+    self.isSendingSequence = TRUE;
+
     __weak typeof(self) weakSelf = self;
     [self.peripheralSequencer sendStringArray:stringArray
-                                      success:^(NSString *responce) {
+                                      success:^(NSString *response) {
                                           // Send should do a better job of indicating that things need to be sent/have been sent.
                                           weakSelf.dialView.currentPositionIndex = 0;
                                           [weakSelf updateProgressBarAndLabels];
                                           weakSelf.sequenceNameLabel.text = self.sequenceName;
                                       } failure:^(NSString *error) {
+                                          // TODO: Maybe indicate error?
                                           weakSelf.sequenceNameLabel.text = @"Send failed";
-                                          // TODO: Indicate Error.
-                                      } finally:nil];
+                                      } finally:^{
+                                          weakSelf.sendSequenceButton.enabled = TRUE;
+                                          weakSelf.isSendingSequence = FALSE;
+                                      }];
 }
 
 - (IBAction)sendSequenceButtonTouchUpinside:(id)sender
@@ -313,6 +322,8 @@
 {
     [self updateConnectionStateLabel];
     [self updateConnectButton];
+
+    self.sendSequenceButton.enabled = connectionState == LSPeripheralConnectionStateConnected;
 
     // We put this to white if we're disconnected so we don't show a misleading
     // green light.

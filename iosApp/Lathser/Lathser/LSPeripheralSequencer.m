@@ -56,7 +56,7 @@ static const NSInteger SUSSPECTED_MAX_BUFFER_SIZE = 128;
 
 
 - (void)sendString:(NSString*)string
-           success:(void (^)(NSString*responce))success
+           success:(void (^)(NSString*response))success
            failure:(void (^)(NSString*error))failure
            finally:(void (^)())finally
 {
@@ -64,7 +64,7 @@ static const NSInteger SUSSPECTED_MAX_BUFFER_SIZE = 128;
 }
 
 - (void)sendStringArray:(NSArray*)stringArray
-                success:(void (^)(NSString*responce))success
+                success:(void (^)(NSString*response))success
                 failure:(void (^)(NSString*error))failure
                 finally:(void (^)())finally
 {

@@ -53,7 +53,7 @@
                                     <action selector="nextButtonTouchUpInside:" destination="CZ4-MO-1fc" eventType="touchUpInside" id="TBL-w0-00C"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5QZ-oA-tzb">
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5QZ-oA-tzb">
                                 <rect key="frame" x="262" y="466" width="36" height="30"/>
                                 <state key="normal" title="Send">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -101,6 +101,7 @@
                         <outlet property="currentStepLabel" destination="pGL-t8-1xk" id="rfU-nK-Rxg"/>
                         <outlet property="dialView" destination="VI0-Gw-KeN" id="jbm-Q8-U8s"/>
                         <outlet property="progressView" destination="yJw-YO-bis" id="NkL-Uy-Zn1"/>
+                        <outlet property="sendSequenceButton" destination="5QZ-oA-tzb" id="A90-X6-uFm"/>
                         <outlet property="sequenceNameLabel" destination="dvO-22-BBu" id="azj-jP-iOd"/>
                         <outlet property="thermalSensorView" destination="SWd-Ar-FN1" id="nsd-6O-zC2"/>
                         <outlet property="totalStepsLabel" destination="3Bv-A5-GSM" id="Ald-66-9jl"/>
