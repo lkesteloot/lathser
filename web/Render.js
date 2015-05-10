@@ -3,8 +3,9 @@
 'use strict';
 
 define(["log", "BoundingBox2D", "Transform"], function (log, BoundingBox2D, Transform) {
-    var Render = function (canvas, transform) {
+    var Render = function (canvas, ctx, transform) {
         this.canvas = canvas;
+        this.ctx = ctx;
         this.transform = transform;
     };
 
@@ -69,7 +70,7 @@ define(["log", "BoundingBox2D", "Transform"], function (log, BoundingBox2D, Tran
             ctx.stroke();
         });
 
-        return new Render(canvas, transform);
+        return new Render(canvas, ctx, transform);
     };
 
     return Render;
