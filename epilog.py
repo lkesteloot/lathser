@@ -23,6 +23,8 @@ PJL_FOOTER = "\x1B%-12345X@PJL EOJ \r\n"
 
 # PCL COMMANDS
 # http://en.wikipedia.org/wiki/Printer_Command_Language
+# http://h20565.www2.hp.com/hpsc/doc/public/display?docId=emr_na-bpl13210
+# http://h20565.www2.hp.com/hpsc/doc/public/display?docId=emr_na-bpl13211
 
 # Set color component one.
 PCL_COLOR_COMPONENT_ONE = "\x1B*v%dA"
@@ -99,10 +101,10 @@ R_BED_HEIGHT = "\x1B*r%dT"
 # Bed width
 R_BED_WIDTH = "\x1B*r%dS"
 
-# Raster compression
+# Raster compression. 0 = unencoded, 1 = run length, 2 = TIFF.
 R_COMPRESSION = "\x1B*b%dM"
 
-# Raster direction (0 = down, 1 = up)
+# Raster direction (0 = top-down, 1 = bottom-up)
 R_DIRECTION = "\x1B&y%dO"
 
 # Start raster job
@@ -214,7 +216,7 @@ def generate_prn(out, doc):
     # PCL resolution.
     out.write(PCL_RESOLUTION % resolution)
 
-    # Raster Orientation
+    # Raster Orientation. 0 = logical page, 3 = physical page.
     out.write(R_ORIENTATION % 0)
 
     if FUSION:
@@ -246,12 +248,12 @@ def generate_prn(out, doc):
     out.write(R_BED_HEIGHT % bed_height)
     out.write(R_BED_WIDTH % bed_width)
 
-    # Raster compression
+    # Raster compression.
     out.write(R_COMPRESSION % 2)
 
     if enableEngraving:
-        # Not implemented.
-        pass
+        for raster in doc.getRasters():
+            generate_raster(out, raster)
 
     if enableCut:
         # Header for the cut.
@@ -279,6 +281,56 @@ def generate_prn(out, doc):
         out.write("Mini]\n")
 
     out.flush()
+
+def generate_raster(out, raster):
+    # Raster direction.
+    out.write(R_DIRECTION % 0)
+
+    # Start this raster.
+    out.write(R_START)
+
+    # Size of image.
+    width, height = raster.image.size
+
+    for row in range(height):
+        # We're always doing the top-down direction.
+        y = raster.y + row
+
+        out.write(PCL_POS_Y % y)
+        out.write(PCL_POS_X % raster.x)
+
+        # XXX Restart (R_END - DIR - START) every 388 scanlines.
+
+        # Width of image in bytes.
+        width_in_bytes = (width + 7) / 8
+
+        buf = ""
+        for byte_index in range(width_in_bytes):
+            begin_col = byte_index*8
+            end_col = min((byte_index + 1)*8, width)
+
+            bit = 128
+            ch = 0
+            for col in range(begin_col, end_col):
+                p = raster.image.getpixel((col, row))
+                if p > 128:
+                    ch |= bit
+                bit /= 2
+            buf += chr(ch)
+
+        # Literal length.
+        buf = chr(len(buf) - 1) + buf
+
+        # Pad to multiple of 8.
+        while len(buf) % 8 != 0:
+            buf += chr(0x80)
+
+        out.write(R_ROW_UNPACKED_BYTES % width_in_bytes)
+        out.write(R_ROW_PACKED_BYTES % len(buf))
+        out.write(buf)
+
+    # End this raster.
+    out.write(R_END)
 
 def generate_cut(out, cut):
     power_set = cut.getPower()

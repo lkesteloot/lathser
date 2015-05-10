@@ -1,1 +1,1 @@
-cp out.prn /Volumes/LAWRENCEUSB/pythong && diskutil eject /Volumes/LAWRENCEUSB
+cp *.prn out.svg /Volumes/LAWRENCEUSB/pythong && diskutil eject /Volumes/LAWRENCEUSB

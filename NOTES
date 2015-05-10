@@ -1,5 +1,7 @@
 
 To do next:
+    - Fix raster output.
+        - Try bi-directional.
     - Cut both sides:
         - 0
         - 180
@@ -7,7 +9,6 @@ To do next:
         - 0 + 1/16
         - ...
     - Get zero point correct.
-    - Graph temperature.
     - Try DNA.
     - Write simulator of cuts as a web page.
     - Increase kerf to get better ears.
@@ -18,6 +19,14 @@ To do next:
     - Add cut lines to let smaller pieces fall off. Not sure how to do this.
       Could try doing it at the raster layer (by drawing radial lines to the
       edges) but that might leave artifacts on the edge of the piece.
+
+Parts of system:
+
+    - Model importer.
+    - Path generator with parameters.
+    - PRN file exporter.
+    - PRN downloader to printer.
+    - Rotation schedule downloader to Arduino.
 
 Notes:
 
@@ -58,4 +67,25 @@ Models:
     - LargeKnight: http://www.thingiverse.com/thing:1100/#files (low-res)
     - My_Scan_1: http://www.thingiverse.com/thing:221556/#files (high-res)
     - DNA: https://grabcad.com/library/dynamic-dna
+
+Web rewrite:
+
+    - Table stakes:
+        * Load model from JSON.
+        * Add bbox stuff (2D and 3D).
+        - Render (lit).
+        - Render (unlit).
+        - Add shade (spiral).
+        - Add base.
+        - Add kerf.
+        - Generate outlines.
+        - Simplify vertices.
+        - Transform vertices.
+        - General PRN.
+        - Generate SVG.
+    - Also:
+        - Load model from Dropbox or web.
+        - Save PRN or SVG to Dropbox or download.
+        - Display model in 3D.
+        - Display paths and cuts in 3D.
 

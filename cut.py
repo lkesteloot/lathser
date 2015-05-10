@@ -1,6 +1,6 @@
 
 # Encapsulates a single continuous cut to be printed to the laser printer.
-class Cut:
+class Cut(object):
     def __init__(self, speed, power, frequency):
         self.speed = speed
         self.power = power
