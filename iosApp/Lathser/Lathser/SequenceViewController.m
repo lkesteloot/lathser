@@ -20,13 +20,13 @@
 
 #import "UARTPeripheral.h"
 #import "SequenceViewController.h"
-#import "LSPeripheralSequencer.h"
+#import "LSBluetoothPeripheral.h"
 #import "DialView.h"
 #import "ThermalSensorView.h"
 #import "LSNotifcationCenter.h"
 
-@interface SequenceViewController () <LSPeripheralSequencerDelegate>
-@property (nonatomic, strong) LSPeripheralSequencer *peripheralSequencer;
+@interface SequenceViewController () <LSBluetoothPeripheralDelegate>
+@property (nonatomic, strong) LSBluetoothPeripheral *bluetoothPeripheral;
 
 @property (weak, nonatomic) IBOutlet UIButton *connectionButton;
 @property (weak, nonatomic) IBOutlet UILabel *connectionStatusLabel;
@@ -53,8 +53,8 @@
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        self.peripheralSequencer = [[LSPeripheralSequencer alloc] init];
-        self.peripheralSequencer.delegate = self;
+        self.bluetoothPeripheral = [[LSBluetoothPeripheral alloc] init];
+        self.bluetoothPeripheral.delegate = self;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sequenceURLNotification:) name:kSequenceUrlNotification object:nil];
 
@@ -102,11 +102,11 @@
 
 - (IBAction)connectButtonTouchUpInside:(id)sender
 {
-    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
-        [self.peripheralSequencer scanForPeripherals];
-    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning ||
-               self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
-        [self.peripheralSequencer disconnect];
+    if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateNotConnected) {
+        [self.bluetoothPeripheral scanForPeripherals];
+    } else if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateScanning ||
+               self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateConnected) {
+        [self.bluetoothPeripheral disconnect];
     }
 }
 
@@ -158,7 +158,7 @@
     self.isSendingSequence = TRUE;
 
     __weak typeof(self) weakSelf = self;
-    [self.peripheralSequencer sendStringArray:stringArray
+    [self.bluetoothPeripheral sendStringArray:stringArray
                                       success:^(NSString *response) {
                                           // Send should do a better job of indicating that things need to be sent/have been sent.
                                           weakSelf.dialView.currentPositionIndex = 0;
@@ -184,49 +184,49 @@
     // It would be nice to have a "heading to"
     // indication that comes up right away, but for now just for preview
     // we let you step through things when not connected.
-    if (self.peripheralSequencer.connectionState != LSPeripheralConnectionStateConnected &&
+    if (self.bluetoothPeripheral.connectionState != LSPeripheralConnectionStateConnected &&
         self.dialView.currentPositionIndex > 0) {
         self.dialView.currentPositionIndex--;
         [self updateProgressBarAndLabels];
     }
-    [self.peripheralSequencer sendString:@"p" success:nil failure:nil finally:nil];
+    [self.bluetoothPeripheral sendString:@"p" success:nil failure:nil finally:nil];
 }
 
 - (IBAction)nextButtonTouchUpInside:(id)sender
 {
     // It would be nice to have a "heading to"
     // indication that comes up right away.
-    if (self.peripheralSequencer.connectionState != LSPeripheralConnectionStateConnected &&
+    if (self.bluetoothPeripheral.connectionState != LSPeripheralConnectionStateConnected &&
         self.dialView.currentPositionIndex + 1 < self.positions.count) {
         self.dialView.currentPositionIndex++;
         [self updateProgressBarAndLabels];
     }
-    [self.peripheralSequencer sendString:@"n" success:nil failure:nil finally:nil];
+    [self.bluetoothPeripheral sendString:@"n" success:nil failure:nil finally:nil];
 }
 
 - (void)updateConnectionStateLabel
 {
-    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
+    if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateConnected) {
         self.connectionStatusLabel.text = @"Connected";
-    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning) {
+    } else if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateScanning) {
         self.connectionStatusLabel.text = @"Scanning";
-    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
+    } else if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateNotConnected) {
         self.connectionStatusLabel.text = @"Not Connected";
     } else {
-        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.peripheralSequencer.connectionState);
+        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.bluetoothPeripheral.connectionState);
     }
 }
 
 - (void)updateConnectButton
 {
-    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
+    if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateConnected) {
         [self.connectionButton setTitle:@"Disconnect" forState:UIControlStateNormal];
-    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning) {
+    } else if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateScanning) {
         [self.connectionButton setTitle:@"Cancel" forState:UIControlStateNormal];
-    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
+    } else if (self.bluetoothPeripheral.connectionState == LSPeripheralConnectionStateNotConnected) {
         [self.connectionButton setTitle:@"Connect" forState:UIControlStateNormal];
     } else {
-        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.peripheralSequencer.connectionState);
+        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.bluetoothPeripheral.connectionState);
     }
 }
 

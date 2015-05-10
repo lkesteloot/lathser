@@ -17,7 +17,7 @@
 		453B3E3D1AC6596700358F2D /* appIcon-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 453B3E351AC6596700358F2D /* appIcon-40@2x.png */; };
 		453B3E3E1AC6596700358F2D /* appIcon-29@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 453B3E361AC6596700358F2D /* appIcon-29@2x.png */; };
 		453CA2C318FD738A009068AB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 453CA2C218FD738A009068AB /* QuartzCore.framework */; };
-		4547D7E81AFEB59D008A45E9 /* LSPeripheralSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4547D7E71AFEB59D008A45E9 /* LSPeripheralSequencer.m */; };
+		4547D7E81AFEB59D008A45E9 /* LSBluetoothPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 4547D7E71AFEB59D008A45E9 /* LSBluetoothPeripheral.m */; };
 		45910B7C18FB3D260059CFF9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7B18FB3D260059CFF9 /* Foundation.framework */; };
 		45910B7E18FB3D260059CFF9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7D18FB3D260059CFF9 /* CoreGraphics.framework */; };
 		45910B8018FB3D260059CFF9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45910B7F18FB3D260059CFF9 /* UIKit.framework */; };
@@ -79,8 +79,8 @@
 		453B3E351AC6596700358F2D /* appIcon-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "appIcon-40@2x.png"; path = "Assets/appIcon-40@2x.png"; sourceTree = "<group>"; };
 		453B3E361AC6596700358F2D /* appIcon-29@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "appIcon-29@2x.png"; path = "Assets/appIcon-29@2x.png"; sourceTree = "<group>"; };
 		453CA2C218FD738A009068AB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		4547D7E61AFEB59D008A45E9 /* LSPeripheralSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSPeripheralSequencer.h; sourceTree = "<group>"; };
-		4547D7E71AFEB59D008A45E9 /* LSPeripheralSequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSPeripheralSequencer.m; sourceTree = "<group>"; };
+		4547D7E61AFEB59D008A45E9 /* LSBluetoothPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSBluetoothPeripheral.h; sourceTree = "<group>"; };
+		4547D7E71AFEB59D008A45E9 /* LSBluetoothPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSBluetoothPeripheral.m; sourceTree = "<group>"; };
 		45910B7818FB3D260059CFF9 /* Lathser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lathser.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		45910B7B18FB3D260059CFF9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		45910B7D18FB3D260059CFF9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -209,8 +209,8 @@
 				45910B8218FB3D260059CFF9 /* Supporting Files */,
 				450D906D1AE49B770029C952 /* LSNotifcationCenter.h */,
 				450D906E1AE49B770029C952 /* LSNotifcationCenter.m */,
-				4547D7E61AFEB59D008A45E9 /* LSPeripheralSequencer.h */,
-				4547D7E71AFEB59D008A45E9 /* LSPeripheralSequencer.m */,
+				4547D7E61AFEB59D008A45E9 /* LSBluetoothPeripheral.h */,
+				4547D7E71AFEB59D008A45E9 /* LSBluetoothPeripheral.m */,
 			);
 			path = Lathser;
 			sourceTree = "<group>";
@@ -414,7 +414,7 @@
 				45910B9818FB3D260059CFF9 /* SettingsViewController.m in Sources */,
 				45910BCF18FB736D0059CFF9 /* UARTPeripheral.m in Sources */,
 				45910B8C18FB3D260059CFF9 /* AppDelegate.m in Sources */,
-				4547D7E81AFEB59D008A45E9 /* LSPeripheralSequencer.m in Sources */,
+				4547D7E81AFEB59D008A45E9 /* LSBluetoothPeripheral.m in Sources */,
 				45910BD218FB73DA0059CFF9 /* CBUUID+StringExtraction.m in Sources */,
 				45910B9518FB3D260059CFF9 /* SequenceViewController.m in Sources */,
 				45910B8818FB3D260059CFF9 /* main.m in Sources */,

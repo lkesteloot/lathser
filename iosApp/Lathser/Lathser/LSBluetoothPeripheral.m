@@ -1,5 +1,5 @@
 //
-//  LSPeripheralSequencer.m
+//  LSBluetoothPeripheral.m
 //  Lathser
 //
 //  Created by Kurt Schaefer on 5/9/15.
@@ -7,7 +7,7 @@
 //
 
 
-#import "LSPeripheralSequencer.h"
+#import "LSBluetoothPeripheral.h"
 
 // This is just a data holding object that holds all the info associated with
 // a given send request.
@@ -27,7 +27,7 @@
 
 
 
-@interface LSPeripheralSequencer () <CBCentralManagerDelegate, UARTPeripheralDelegate>
+@interface LSBluetoothPeripheral () <CBCentralManagerDelegate, UARTPeripheralDelegate>
 @property (nonatomic, strong) CBCentralManager *cbManager;
 @property (nonatomic, strong) UARTPeripheral* currentPeripheral;
 
@@ -36,7 +36,7 @@
 @property (nonatomic, assign) NSInteger currentStringIndex;
 @end
 
-@implementation LSPeripheralSequencer
+@implementation LSBluetoothPeripheral
 
 // We give the arduino a max of 2 seconds to respond.  Make this longer if your
 // code doesn't poll the ble very often.

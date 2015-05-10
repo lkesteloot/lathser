@@ -1,5 +1,5 @@
 //
-//  LSPeripheralSequencer.h
+//  LSBluetoothPeripheral.h
 //  Lathser
 //
 //  Created by Kurt Schaefer on 5/9/15.
@@ -33,14 +33,14 @@ typedef NS_ENUM(NSInteger, LSPeripheralConnectionState) {
 };
 
 
-@protocol LSPeripheralSequencerDelegate <NSObject>
+@protocol LSBluetoothPeripheralDelegate <NSObject>
 - (void)didRecieveString:(NSString*)string;
 - (void)connectionStateChanged:(LSPeripheralConnectionState)connectionState;
 @end
 
-@interface LSPeripheralSequencer : NSObject
+@interface LSBluetoothPeripheral : NSObject
 @property (nonatomic, assign) LSPeripheralConnectionState connectionState;
-@property (nonatomic, weak) id<LSPeripheralSequencerDelegate> delegate;
+@property (nonatomic, weak) id<LSBluetoothPeripheralDelegate> delegate;
 
 - (void)scanForPeripherals;
 - (void)disconnect;
