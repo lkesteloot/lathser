@@ -317,7 +317,7 @@
     // We put this to white if we're disconnected so we don't show a misleading
     // green light.
     if (connectionState != LSPeripheralConnectionStateConnected) {
-        self.thermalSensorView.value = 1;
+        self.thermalSensorView.value = 0;
     }
 }
 

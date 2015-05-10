@@ -30,7 +30,6 @@ typedef NS_ENUM(NSInteger, LSPeripheralConnectionState) {
 @end
 
 @interface LSPeripheralSequencer : NSObject
-@property (nonatomic, strong) UARTPeripheral* currentPeripheral;
 @property (nonatomic, assign) LSPeripheralConnectionState connectionState;
 @property (nonatomic, weak) id<LSPeripheralSequencerDelegate> delegate;
 
