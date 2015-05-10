@@ -23,6 +23,6 @@
 #import "UARTPeripheral.h"
 
 
-@interface SequenceViewController : UIViewController <CBCentralManagerDelegate, UARTPeripheralDelegate>
+@interface SequenceViewController : UIViewController
 
 @end

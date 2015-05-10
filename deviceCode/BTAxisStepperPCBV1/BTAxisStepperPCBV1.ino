@@ -65,6 +65,9 @@ int gPositionArrayMax = sizeof(gPositionArray)/sizeof(int);
 int gPositionArraySize = 0;
 int gPositionArrayIndex = -1;
 
+unsigned long gLastTimeSignalFired;
+boolean gWaitingForThermalFalling;
+
 void setup(void)
 { 
   Serial.begin(9600);
@@ -101,7 +104,15 @@ void setup(void)
   Stepper.setAcceleration(3000);
   Stepper.setCurrentPosition(0);
 
+  gLastTimeSignalFired = 0;
+  gWaitingForThermalFalling = false;
   BTLEserial.begin();
+}
+
+void acknowlageBLE(void)
+{
+  Serial.println("*");
+  sendStringBT(&String("*"));
 }
 
 void setLed(char ledState)
@@ -110,10 +121,14 @@ void setLed(char ledState)
   digitalWrite(LED_RED_DIG_OUT, (ledState == LED_RED || ledState == LED_AMBER) ? HIGH : LOW);
 }
 
-void sendThermalSensorValue()
+void sendThermalSensorValue(boolean isResponse)
 {
   int thermalValue =  averagedThermalReading();
-  sendStringBT(&String("TEMP " + String(thermalValue)));
+  if (isResponse) {
+    sendStringBT(&String("*TEMP " + String(thermalValue)));
+  } else {
+    sendStringBT(&String("TEMP " + String(thermalValue)));
+  }
   Serial.println(String(thermalValue).c_str());
 }
 
@@ -159,20 +174,20 @@ unsigned char blockingReadUnsignedChar()
 
 int blockingReadInt()
 {
-  unsigned char digit = (char)blockingReadUnsignedChar();
+  unsigned char digit = blockingReadUnsignedChar();
   int value = 0;
   int postMultiply = (digit == '-') ? -1 : 1;
 
   // Right now the '-' code doesn't seem to work. Not sure why.
   // The '-' doesn't arrive.  We might be screwing it up on the app end of things.
   if (digit == '-') {
-    digit = (char)blockingReadUnsignedChar();
+    digit = blockingReadUnsignedChar();
   }
 
   // Primative a to i for units, etc.
   while (digit >= '0' && digit <= '9') {
     value = value*10 + (digit - '0');
-    digit = (char)blockingReadUnsignedChar();
+    digit = blockingReadUnsignedChar();
   } 
   return value*postMultiply;
 }
@@ -183,8 +198,8 @@ void sendStringBT(String *s)
       return;
     }
   
-    uint8_t sendbuffer[20];
-    s->getBytes(sendbuffer, 20);
+    uint8_t sendbuffer[32];
+    s->getBytes(sendbuffer, 32);
     char sendbuffersize = min(20, s->length());
      BTLEserial.write(sendbuffer, sendbuffersize);
      blePoll();
@@ -206,25 +221,85 @@ int averagedThermalReading()
 
 boolean waitForThermalSwitchOrBTCommand()
 {
-  int baseValue = averagedThermalReading();
-  int currentValue = baseValue;
+  int t1 = averagedThermalReading();
+  int t0 = t1;
+  int dt = 0;
+  
+  while (!BTLEserial.available()) {
+    t0 = t1;
+    t1 = averagedThermalReading();
 
-  Serial.println("    waiting on thermal");  
+    dt = t1 - t0;
 
-  do {
-    currentValue = averagedThermalReading();
-    if (currentValue < baseValue) {
-      baseValue = currentValue;
+    Serial.println(t1);
+    if (dt >= 3 && !gWaitingForThermalFalling) {
+      // We use a global flag so it persists between calls to this.
+      gWaitingForThermalFalling = true;
+      Serial.print("fire");
+      return true;
+    } if (dt <= 0 ) {
+      gWaitingForThermalFalling = false;
     }
-    blePoll();
-    if (BTLEserial.available()) {
-      return false;
+
+    // We only sample 5 times a second, so we spend the rest of the time
+    // looking for BLE interruption.
+    unsigned long nextSampleTime = millis() + 200;
+    while (millis() < nextSampleTime) {
+      blePoll();
+      if (BTLEserial.available()) {
+	break;
+      }
     }
-  } while (currentValue < baseValue + 10);
+  }
+  return false;
+}
 
-  Serial.print("    done");
+void signalFired()
+{
+  unsigned long curMillis = millis();
+  // If the last time the thermal signal fired was less than a second ago, we assume 
+  // this is a miss-fire and set the LED to red.
+  if (curMillis - gLastTimeSignalFired < 1000) {
+    setLed(LED_RED);
+  } else {
+    // Otherwise signal with green.
+    setLed(LED_GREEN);
+  }
+  gLastTimeSignalFired = curMillis;
+}
 
-  return true;
+void runThermalSerialTest()
+{
+  int t1 = averagedThermalReading();
+  int t0 = t1;
+  int dt = 0;
+  
+  while (1) {
+    t0 = t1;
+    t1 = averagedThermalReading();
+
+    dt = t1 - t0;
+
+    Serial.print("value: ");
+    Serial.print(t1);
+    Serial.print(" dt: ");
+    Serial.println(dt);
+    delay(200);
+    if (dt >= 3 && !gWaitingForThermalFalling) {
+      signalFired();
+      gWaitingForThermalFalling = true;
+      Serial.println("FIRE");
+    } if (dt <= 0 ) {
+      gWaitingForThermalFalling = false;
+    }
+
+    unsigned long curMillis = millis();
+
+    // After having at least one second of not firing we clear the led.
+    if (curMillis - gLastTimeSignalFired > 1000) {
+      setLed(LED_OFF);
+    }
+  }
 }
 
 void sequenceLoop()
@@ -236,7 +311,7 @@ void sequenceLoop()
     Serial.println(gPositionArray[gPositionArrayIndex]);
 
     // Report all the info for this step, then run to the new position.
-    sendThermalSensorValue();
+    sendThermalSensorValue(false);
     sendStepperPosition();
     sendStringBT(&String("RUN " + String(gPositionArrayIndex)));
     
@@ -251,17 +326,22 @@ void sequenceLoop()
       // Inside the sequence loop the commands are n-next, p-previous, q-quit.
       if (commandChar == 'p') {
 	if (gPositionArrayIndex > 0) {
+	  acknowlageBLE();
 	  gPositionArrayIndex--;
 	} else {
+	  sendStringBT(&String("*ignored"));
 	  Serial.println("  Ignoring");
 	}
       } else if (commandChar == 'n') {
 	if (gPositionArrayIndex + 1 < gPositionArraySize) {
+	  acknowlageBLE();
 	  gPositionArrayIndex++;
 	} else {
+	  sendStringBT(&String("*ignoring"));
 	  Serial.println("  Ignoring");
 	}
       } else if (commandChar == 'q') {
+	acknowlageBLE();
 	return;
       }
     } else {
@@ -278,7 +358,6 @@ void commandLoop()
   char commandChar = 0;
   
   while (!done) {
-    //    sendThermalSensorValue();
     blePoll();
 
     commandChar = (char)blockingReadUnsignedChar();
@@ -289,6 +368,7 @@ void commandLoop()
       // x means kill off our position array.
       gPositionArraySize = 0;
       gPositionArrayIndex = -1;
+      acknowlageBLE();
     } else if (commandChar == 'a') {
       // a means add a position to our position array.
       int position = (int)blockingReadInt();
@@ -296,24 +376,30 @@ void commandLoop()
       Serial.println(position);
       if (gPositionArraySize < gPositionArrayMax - 1) {
 	gPositionArray[gPositionArraySize++] = position;
+	acknowlageBLE();
       } else {
+	sendStringBT(&String("*tomany"));
 	Serial.println("error too many positions");
       }
     } else if (commandChar == 's') {
       // s means start going though the position sequence.
       gPositionArrayIndex = 0;
+      acknowlageBLE();
       sendStringBT(&String("RUN " + String(gPositionArrayIndex)));
-      sendThermalSensorValue();
+      sendThermalSensorValue(false);
       Stepper.setCurrentPosition(0);
       sequenceLoop();
     } else if (commandChar == 't') {
-      sendThermalSensorValue();      
+      sendThermalSensorValue(true);      
+    } else {
+      acknowlageBLE();
     }
   }
 }
 
 void loop()
 {
-  commandLoop();
+  //  runThermalSerialTest();
+    commandLoop();
 }
 

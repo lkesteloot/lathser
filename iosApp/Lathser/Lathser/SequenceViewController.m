@@ -20,19 +20,13 @@
 
 #import "UARTPeripheral.h"
 #import "SequenceViewController.h"
+#import "LSPeripheralSequencer.h"
 #import "DialView.h"
 #import "ThermalSensorView.h"
 #import "LSNotifcationCenter.h"
 
-typedef NS_ENUM(NSInteger, JogConnectionState) {
-    JogConnectionStateNotConnected = 0,
-    JogConnectionStateScanning,
-    JogConnectionStateConnected,
-};
-
-
-@interface SequenceViewController ()
-@property (nonatomic, strong) CBCentralManager *cbManager;
+@interface SequenceViewController () <LSPeripheralSequencerDelegate>
+@property (nonatomic, strong) LSPeripheralSequencer *peripheralSequencer;
 
 @property (weak, nonatomic) IBOutlet UIButton *connectionButton;
 @property (weak, nonatomic) IBOutlet UILabel *connectionStatusLabel;
@@ -41,9 +35,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 @property (weak, nonatomic) IBOutlet UILabel *currentStepLabel;
 @property (weak, nonatomic) IBOutlet UILabel *totalStepsLabel;
 @property (weak, nonatomic) IBOutlet UIProgressView *progressView;
-
-@property (nonatomic, strong) UARTPeripheral* currentPeripheral;
-@property (nonatomic, assign) JogConnectionState connectionState;
 
 @property (nonatomic, strong) IBOutlet DialView* dialView;
 @property (nonatomic, strong) IBOutlet ThermalSensorView* thermalSensorView;
@@ -60,8 +51,8 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        self.cbManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-        self.connectionState = JogConnectionStateNotConnected;
+        self.peripheralSequencer = [[LSPeripheralSequencer alloc] init];
+        self.peripheralSequencer.delegate = self;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sequenceURLNotification:) name:kSequenceUrlNotification object:nil];
 
@@ -109,50 +100,25 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 
 - (IBAction)connectButtonTouchUpInside:(id)sender
 {
-    if (self.connectionState == JogConnectionStateNotConnected) {
-        [self scanForPeripherals];
-    } else if (self.connectionState == JogConnectionStateScanning ||
-               self.connectionState == JogConnectionStateConnected) {
-        self.connectionState = JogConnectionStateNotConnected;
-        if (self.currentPeripheral.peripheral) {
-            [self.cbManager cancelPeripheralConnection:self.currentPeripheral.peripheral];
-        }
+    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
+        [self.peripheralSequencer scanForPeripherals];
+    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning ||
+               self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
+        [self.peripheralSequencer disconnect];
     }
 }
 
-- (void)scanForPeripherals
-{
-    // skip scanning if UART is already connected
-    NSArray *connectedPeripherals = [self.cbManager retrieveConnectedPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]];
-    if ([connectedPeripherals count] > 0) {
-        [self connectPeripheral:[connectedPeripherals objectAtIndex:0]];
-    } else {
-        self.connectionState = JogConnectionStateScanning;
-        [self.cbManager scanForPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]
-                                               options:@{CBCentralManagerScanOptionAllowDuplicatesKey: [NSNumber numberWithBool:FALSE]}];
-    }
-}
-
-- (void)connectPeripheral:(CBPeripheral*)peripheral
-{
-    // Clear off any pending connections
-    [self.cbManager cancelPeripheralConnection:peripheral];
-
-    // Connect
-    self.currentPeripheral = [[UARTPeripheral alloc] initWithPeripheral:peripheral delegate:self];
-    [self.cbManager connectPeripheral:peripheral options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: [NSNumber numberWithBool:TRUE]}];
-}
-
-- (void)disconnect
-{
-    self.connectionState = JogConnectionStateNotConnected;
-    [self.cbManager cancelPeripheralConnection:self.currentPeripheral.peripheral];
-}
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self  updateProgressBarAndLabels];
 }
 
 - (NSInteger)stepValueForRadians:(CGFloat)theta
@@ -164,25 +130,38 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
 - (void)sendAndStartCurrentSequence
 {
     // Quit whatever we were doing.
-    [self sendString:@"q"];
+    NSMutableArray *stringArray = [[NSMutableArray alloc] init];
+
+    // Quit whatever it was doing.
+    [stringArray addObject:@"q"];
 
     // Kill off any existing sequence values.
-    [self sendString:@"x"];
+    [stringArray addObject:@"x"];
 
     // Do an "a800 " style adding of each of the coordinates.
     // The positions are sent in steps.
     for (NSNumber* number in self.positions) {
-        [self sendString:[NSString stringWithFormat:@"a%ld ", (long)[self stepValueForRadians:[number floatValue]]]];
+        [stringArray addObject:[NSString stringWithFormat:@"a%ld ", (long)[self stepValueForRadians:[number floatValue]]]];
     }
 
     // start the sequence, moving to the first location and
     // waiting for the thermal sensor.
-    [self sendString:@"s"];
+    [stringArray addObject:@"s"];
 
-    // Send should do a better job of indicating that things need to be sent/have been sent.
-    self.dialView.currentPositionIndex = 0;
-    [self updateProgressBarAndLabels];
-    self.sequenceNameLabel.text = self.sequenceName;
+    self.sequenceNameLabel.text = @"Sending...";
+    self.progressView.progress = 0;
+
+    __weak typeof(self) weakSelf = self;
+    [self.peripheralSequencer sendStringArray:stringArray
+                                      success:^(NSString *responce) {
+                                          // Send should do a better job of indicating that things need to be sent/have been sent.
+                                          weakSelf.dialView.currentPositionIndex = 0;
+                                          [weakSelf updateProgressBarAndLabels];
+                                          weakSelf.sequenceNameLabel.text = self.sequenceName;
+                                      } failure:^(NSString *error) {
+                                          weakSelf.sequenceNameLabel.text = @"Send failed";
+                                          // TODO: Indicate Error.
+                                      } finally:nil];
 }
 
 - (IBAction)sendSequenceButtonTouchUpinside:(id)sender
@@ -196,49 +175,49 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     // It would be nice to have a "heading to"
     // indication that comes up right away, but for now just for preview
     // we let you step through things when not connected.
-    if (self.connectionState != JogConnectionStateConnected &&
+    if (self.peripheralSequencer.connectionState != LSPeripheralConnectionStateConnected &&
         self.dialView.currentPositionIndex > 0) {
         self.dialView.currentPositionIndex--;
         [self updateProgressBarAndLabels];
     }
-    [self sendString:@"p"];
+    [self.peripheralSequencer sendString:@"p" success:nil failure:nil finally:nil];
 }
 
 - (IBAction)nextButtonTouchUpInside:(id)sender
 {
     // It would be nice to have a "heading to"
     // indication that comes up right away.
-    if (self.connectionState != JogConnectionStateConnected &&
+    if (self.peripheralSequencer.connectionState != LSPeripheralConnectionStateConnected &&
         self.dialView.currentPositionIndex + 1 < self.positions.count) {
         self.dialView.currentPositionIndex++;
         [self updateProgressBarAndLabels];
     }
-    [self sendString:@"n"];
+    [self.peripheralSequencer sendString:@"n" success:nil failure:nil finally:nil];
 }
 
 - (void)updateConnectionStateLabel
 {
-    if (self.connectionState == JogConnectionStateConnected) {
+    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
         self.connectionStatusLabel.text = @"Connected";
-    } else if (self.connectionState == JogConnectionStateScanning) {
+    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning) {
         self.connectionStatusLabel.text = @"Scanning";
-    } else if (self.connectionState == JogConnectionStateNotConnected) {
+    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
         self.connectionStatusLabel.text = @"Not Connected";
     } else {
-        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.connectionState);
+        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.peripheralSequencer.connectionState);
     }
 }
 
 - (void)updateConnectButton
 {
-    if (self.connectionState == JogConnectionStateConnected) {
+    if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateConnected) {
         [self.connectionButton setTitle:@"Disconnect" forState:UIControlStateNormal];
-    } else if (self.connectionState == JogConnectionStateScanning) {
+    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateScanning) {
         [self.connectionButton setTitle:@"Cancel" forState:UIControlStateNormal];
-    } else if (self.connectionState == JogConnectionStateNotConnected) {
+    } else if (self.peripheralSequencer.connectionState == LSPeripheralConnectionStateNotConnected) {
         [self.connectionButton setTitle:@"Connect" forState:UIControlStateNormal];
     } else {
-        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.connectionState);
+        NSAssert(FALSE, @"Unknown connection state: %d", (int)self.peripheralSequencer.connectionState);
     }
 }
 
@@ -248,22 +227,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     [self.progressView setProgress:(float)index/(float)(self.positions.count - 1) animated:YES];
     self.currentStepLabel.text = [NSString stringWithFormat:@"%ld", index + 1];
     self.totalStepsLabel.text = [NSString stringWithFormat:@"%ld", self.positions.count];
-}
-
-- (void)setConnectionState:(JogConnectionState)connectionState
-{
-    if (_connectionState == connectionState) {
-        return;
-    }
-    _connectionState = connectionState;
-    [self updateConnectionStateLabel];
-    [self updateConnectButton];
-
-    // We put this to white if we're disconnected so we don't show a misleading
-    // green light.
-    if (self.connectionState != JogConnectionStateConnected) {
-        self.thermalSensorView.value = 1;
-    }
 }
 
 - (NSString*)hexRepresentationOfData:(NSData*)data withSpaces:(BOOL)spaces
@@ -291,38 +254,6 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     return hex;
 }
 
-- (void)sendString:(NSString*)string
-{
-    NSLog(@"SendString: \"%@\"", string);
-    NSData *data = [NSData dataWithBytes:string.UTF8String length:string.length];
-    [self sendData:data];
-}
-
-- (void)sendData:(NSData*)data
-{
-    // Output data to UART peripheral
-    NSString *hexString = [self hexRepresentationOfData:data withSpaces:YES];
-    NSLog(@"Sending: %@", hexString);
-
-    [self.currentPeripheral writeRawData:data];
-}
-
-
-- (void)clearPositonArray
-{
-    [self sendString:@"x"];
-}
-
-- (void)addPosition:(NSInteger)position
-{
-    [self sendString:[NSString stringWithFormat:@"a%@ ", @(position)]];
-}
-
-- (void)startSequence
-{
-    [self sendString:@"s"];
-}
-
 - (void)sequenceURLNotification:(NSNotification*)notification
 {
     NSURL *url = [notification object];
@@ -348,102 +279,10 @@ typedef NS_ENUM(NSInteger, JogConnectionState) {
     }
 }
 
-#pragma mark CBCentralManagerDelegate
-- (void)centralManagerDidUpdateState:(CBCentralManager*)central
+#pragma mark LSPeripheralSequencerDelegate
+- (void)didRecieveString:(NSString*)string
 {
-    NSLog(@"centralManagerDidUpdateState");
-    switch (central.state) {
-        case CBCentralManagerStatePoweredOff:
-            NSLog(@"CoreBluetooth BLE hardware is powered off");
-            break;
-        case CBCentralManagerStatePoweredOn:
-            NSLog(@"CoreBluetooth BLE hardware is powered on and ready");
-            break;
-        case CBCentralManagerStateResetting:
-            NSLog(@"CoreBluetooth BLE hardware is resetting");
-            break;
-        case CBCentralManagerStateUnauthorized:
-            NSLog(@"CoreBluetooth BLE state is unauthorized");
-            break;
-        case CBCentralManagerStateUnknown:
-            NSLog(@"CoreBluetooth BLE state is unknown");
-            break;
-        case CBCentralManagerStateUnsupported:
-            NSLog(@"CoreBluetooth BLE hardware is unsupported on this platform");
-            break;
-        default:
-            break;
-    }
-}
-
-- (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
-{
-    NSLog(@"Did discover peripheral %@", peripheral.name);
-    NSLog(@"With data: %@", advertisementData);
-    [self.cbManager stopScan];
-    [self connectPeripheral:peripheral];
-}
-
-- (void)centralManager:(CBCentralManager*)central didConnectPeripheral:(CBPeripheral*)peripheral
-{
-    NSLog(@"didConnectPeripheral: %@", peripheral);
-    if ([self.currentPeripheral.peripheral isEqual:peripheral]) {
-        // already discovered services, DO NOT re-discover. Just pass along the peripheral.
-        if (peripheral.services){
-            NSLog(@"Did connect to existing peripheral %@", peripheral.name);
-            [self.currentPeripheral peripheral:peripheral didDiscoverServices:nil];
-        } else {
-            NSLog(@"Did connect peripheral %@", peripheral.name);
-            [self.currentPeripheral didConnect];
-        }
-    }
-}
-
-- (void) centralManager:(CBCentralManager*)central
-didDisconnectPeripheral:(CBPeripheral*)peripheral
-                  error:(NSError*)error
-{
-    NSLog(@"Did disconnect peripheral %@", peripheral.name);
-    [self peripheralDidDisconnect];
-
-    if ([self.currentPeripheral.peripheral isEqual:peripheral]) {
-        [self.currentPeripheral didDisconnect];
-    }
-}
-
-#pragma mark UARTPeripheralDelegate
-- (void)didReadHardwareRevisionString:(NSString *)string
-{
-    NSLog(@"HW Revision: %@", string);
-    if (self.connectionState != JogConnectionStateScanning) {
-        return;
-    }
-    self.connectionState = JogConnectionStateConnected;
-}
-
-- (void)didReceiveData:(NSData *)newData
-{
-    int dataLength = (int)newData.length;
-    uint8_t data[dataLength];
-
-    [newData getBytes:&data length:dataLength];
-
-    for (int i = 0; i<dataLength; i++) {
-
-        if ((data[i] <= 0x1f) || (data[i] >= 0x80)) {    //null characters
-            if ((data[i] != 0x9) && //0x9 == TAB
-                (data[i] != 0xa) && //0xA == NL
-                (data[i] != 0xd)) { //0xD == CR
-                data[i] = 0xA9;
-            }
-        }
-    }
-
-    NSString *newString = [[NSString alloc]initWithBytes:&data
-                                                  length:dataLength
-                                                encoding:NSUTF8StringEncoding];
-    NSLog(@"ReceivData: %@", newString);
-    NSArray* stringComponents = [newString componentsSeparatedByString:@" "];
+    NSArray* stringComponents = [string componentsSeparatedByString:@" "];
 
     if (stringComponents.count == 1) {
         NSString* command = [stringComponents objectAtIndex:0];
@@ -470,17 +309,17 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
     }
 }
 
-- (void)uartDidEncounterError:(NSString *)error
+- (void)connectionStateChanged:(LSPeripheralConnectionState)connectionState
 {
-    NSLog(@"ERROR: %@", error);
+    [self updateConnectionStateLabel];
+    [self updateConnectButton];
+
+    // We put this to white if we're disconnected so we don't show a misleading
+    // green light.
+    if (connectionState != LSPeripheralConnectionStateConnected) {
+        self.thermalSensorView.value = 1;
+    }
 }
 
-- (void)peripheralDidDisconnect
-{
-    NSLog(@"Peripheral disconnected");
-
-    self.connectionState = JogConnectionStateNotConnected;
-    // Original code disabled the connect button for 1 second.
-}
 
 @end

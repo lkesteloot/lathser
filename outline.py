@@ -96,7 +96,7 @@ SVG_HEIGHT = 20*DPI
 # Output file type.
 OUTPUT_EXTENSION = "svg"     # For Illustrator
 # OUTPUT_EXTENSION = "vector"  # For Ctrl-cut
-OUTPUT_EXTENSION = "prn"     # For direct printing
+# OUTPUT_EXTENSION = "prn"     # For direct printing
 
 # We can only output integers, so we translate to a much higher DPI.
 VECTOR_DPI = 1200
