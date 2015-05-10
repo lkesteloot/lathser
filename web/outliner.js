@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["underscore", "log", "Vector2", "Hashtable", "Path"], function (_, log, Vector2, Hashtable, Path) {
+define(["underscore", "log", "Vector2", "Hashtable", "Path", "Paths"], function (_, log, Vector2, Hashtable, Path, Paths) {
     // Two Vector2 objects representing an edge of the object.
     var Edge = function (v1, v2) {
         this.v1 = v1;
@@ -35,11 +35,8 @@ define(["underscore", "log", "Vector2", "Hashtable", "Path"], function (_, log, 
     var edgeIsNotUsed = function (edge) {
         return !edge.used;
     };
-    var pathLength = function (path) {
-        return path.getLength();
-    };
 
-    // Returns an array of Path objects.
+    // Returns a Paths objects.
     var findOutlines = function (render) {
         // Array of Edge objects found in the image.
         var edges = [];
@@ -118,11 +115,11 @@ define(["underscore", "log", "Vector2", "Hashtable", "Path"], function (_, log, 
 
         // Walk around, starting at any edge.
         log.info("Making sequence of vertices...");
-        var paths = [];
+        var paths = new Paths();
 
         // Current path.
         var path = new Path();
-        paths.push(path);
+        paths.addPath(path);
         var edge = edges[0];
         path.addVertex(edge.v1);
 
@@ -156,7 +153,7 @@ define(["underscore", "log", "Vector2", "Hashtable", "Path"], function (_, log, 
             if (connectedEdges.length === 0) {
                 // Start new path.
                 path = new Path();
-                paths.push(path);
+                paths.addPath(path);
                 edge = edges[0];
                 path.addVertex(edge.v1);
                 vertex = edge.v2;
@@ -173,19 +170,7 @@ define(["underscore", "log", "Vector2", "Hashtable", "Path"], function (_, log, 
 
         // Log results.
         edges = _.filter(edges, edgeIsNotUsed);
-        log.info("Sequence has " + paths.length + " paths (" + _.map(paths, pathLength).join(", ") + "), with " + edges.length + " edges unused.");
-
-        if (true) {
-            render.ctx.save();
-            render.ctx.strokeStyle = "red";
-            render.ctx.lineWidth = 5;
-            _.each(paths, function (path) {
-                render.ctx.beginPath();
-                path.draw(render.ctx);
-                render.ctx.stroke();
-            });
-            render.ctx.restore();
-        }
+        log.info("Sequence has " + paths.getLength() + " paths (" + paths.pathLengths() + "), with " + edges.length + " edges unused.");
 
         return paths;
     };

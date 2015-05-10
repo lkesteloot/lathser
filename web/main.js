@@ -20,6 +20,8 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner"], function ($
         var light = (new Vector3(-1, 1, 1)).normalized();
         var render = Render.make(model, 1024, 1024, 0, null);
         var paths = outliner.findOutlines(render);
+        paths.simplify(1);
+        paths.draw(render.ctx);
         $("body").append(render.canvas);
     }, function (error) {
         log.warn("Error loading model:", error);
