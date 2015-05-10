@@ -271,7 +271,9 @@ didDisconnectPeripheral:(CBPeripheral*)peripheral
         // If we've sent all the strings in the array we pop off the sendInfo and
         // inform the caller.
         if (sendInfo.acknowlagedStringCount >= sendInfo.stringArray.count) {
-            [self.sendInfoQueue removeObjectAtIndex:0];
+            if (self.sendInfoQueue.count > 0) {
+                [self.sendInfoQueue removeObjectAtIndex:0];
+            }
 
             if (sendInfo.success) {
                 sendInfo.success([receivedString substringFromIndex:1]);
