@@ -97,7 +97,8 @@ static const NSInteger SUSSPECTED_MAX_BUFFER_SIZE = 128;
     }
     [self.currentPeripheral writeRawData:data];
 
-    self.sendTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:SEND_TIMEOUT target:self selector:@selector(sendTimedOut:) userInfo:sendInfo repeats:FALSE];
+    self.sendTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:(self.connectionState == LSPeripheralConnectionStateConnected) ? SEND_TIMEOUT : 0.0
+                                                             target:self selector:@selector(sendTimedOut:) userInfo:sendInfo repeats:FALSE];
 }
 
 - (void)sendTimedOut:(NSTimer*)timer
@@ -108,7 +109,11 @@ static const NSInteger SUSSPECTED_MAX_BUFFER_SIZE = 128;
     self.sendTimeoutTimer = nil;
 
     if (sendInfo.failure) {
-        sendInfo.failure(@"Timed out");
+        if (self.connectionState == LSPeripheralConnectionStateConnected) {
+            sendInfo.failure(@"Timed out");
+        } else {
+            sendInfo.failure(@"Not Connected");
+        }
     }
     if (sendInfo.finally) {
         sendInfo.finally();
