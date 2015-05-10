@@ -2,9 +2,24 @@
 
 'use strict';
 
-define(["jquery", "underscore", "log", "Triangle3D", "Vector3"], function ($, _, log, Triangle3D, Vector3) {
+define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"], function ($, _, log, Triangle3D, Vector3, BoundingBox3D) {
     var Model = function (triangles) {
         this.triangles = triangles;
+    };
+
+    Model.prototype.getBoundingBox = function () {
+        var bbox3d = new BoundingBox3D();
+        _.each(this.triangles, function (triangle) {
+            bbox3d.addTriangle(triangle);
+        });
+        return bbox3d;
+    };
+
+    // Translate the model in-place by the Vector3.
+    Model.prototype.translate = function (v) {
+        this.triangles = _.map(this.triangles, function (triangle) {
+            return triangle.translate(v);
+        });
     };
 
     /**

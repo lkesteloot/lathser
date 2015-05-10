@@ -34,5 +34,12 @@ define(["underscore", "Triangle2D"], function (_, Triangle2D) {
         }));
     };
 
+    // Return a new Triangle3D translated by the Vector3.
+    Triangle3D.prototype.translate = function (v) {
+        return new Triangle3D(_.map(this.vertices, function (vertex) {
+            return vertex.plus(v);
+        }));
+    };
+
     return Triangle3D;
 });

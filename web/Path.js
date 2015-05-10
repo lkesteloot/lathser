@@ -3,8 +3,8 @@
 'use strict';
 
 define(["underscore"], function (_) {
-    var Path = function () {
-        this.vertices = [];
+    var Path = function (vertices) {
+        this.vertices = vertices || [];
     };
 
     Path.prototype.addVertex = function (v) {
@@ -45,9 +45,14 @@ define(["underscore"], function (_) {
 
     // Returns a new Path with the vertices from first to last inclusive.
     Path.prototype.subPath = function (first, last) {
-        var path = new Path();
-        path.vertices = this.vertices.slice(first, last + 1);
-        return path;
+        return new Path(this.vertices.slice(first, last + 1));
+    };
+
+    // Returns a new path with the vertices transformed.
+    Path.prototype.transform = function (transform) {
+        return new Path(_.map(this.vertices, function (v) {
+            return transform.transform(v);
+        }));
     };
 
     Path.prototype.draw = function (ctx) {

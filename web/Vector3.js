@@ -10,7 +10,11 @@ define(["Vector2"], function (Vector2) {
     };
 
     Vector3.prototype.toString = function () {
-        return "Vector3[" + this.x + "," + this.y + "," + this.z + "]";
+        return "Vector3[" + this.toStringTerse() + "]";
+    };
+
+    Vector3.prototype.toStringTerse = function () {
+        return this.x + "," + this.y + "," + this.z;
     };
 
     Vector3.prototype.negated = function () {

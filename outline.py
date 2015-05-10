@@ -65,12 +65,6 @@ IMAGE_SIZE = 256
 # but low-res, 5 is slower but high-res.
 RENDER_SCALE = 2
 
-# Whether to generate a single file (True) or individual files (False).
-GENERATE_SINGLE_FILE = True
-
-# If generating a single file, whether to generate a single path.
-GENERATE_SINGLE_PATH = False
-
 # Whether to also generate a lit version of the raster.
 GENERATE_LIT_VERSION = False
 
@@ -747,57 +741,13 @@ def main():
                 paths = get_outlines(image)
                 paths = [simplify_vertices(vertices, 1) for vertices in paths]
                 paths = [transform_vertices(vertices, transform, scale) for vertices in paths]
-                if GENERATE_SINGLE_FILE:
-                    if GENERATE_SINGLE_PATH:
-                        # Assume no holes, append only first path. We could instead append
-                        # the path that has the longest total distance.
-                        if paths:
-                            # Find the longest path (most number of vertices).
-                            path = max(paths, key=lambda path: len(path))
-                            all_paths.append(path)
-                    else:
-                        all_paths.extend(paths)
-                        all_paths.extend(make_heat_sensor())
-                        all_paths.extend(make_time_waster(is_last))
-                else:
-                    generate_file("out%02d" % index, paths)
+                all_paths.extend(paths)
+                all_paths.extend(make_heat_sensor())
+                all_paths.extend(make_time_waster(is_last))
                 index += 1
                 print
 
-        if GENERATE_SINGLE_FILE:
-            if GENERATE_SINGLE_PATH:
-                # Find the top-most Y coordinate.
-                top_y = sys.float_info.max
-                for path in all_paths:
-                    for vertex in path:
-                        top_y = min(top_y, vertex.y)
-
-                # Make some room.
-                top_y -= DPI/8.0
-
-                # Blend all paths into one.
-                single_path = []
-                for path in all_paths:
-                    # Make sure all paths go left to right.
-                    if path[0].x > path[-1].x:
-                        path.reverse()
-
-                    if single_path:
-                        previous_vertex = single_path[-1]
-                        next_vertex = path[0]
-
-                        # Make return around the object. We must go from previous_vertex
-                        # to next_vertex without touching the object. We do this by
-                        # returning to a low Y value.
-                        single_path.append(Vector2(previous_vertex.x, top_y))
-                        single_path.append(Vector2(next_vertex.x, top_y))
-
-                    single_path.extend(path)
-
-                all_paths = [single_path]
-                print "The single path has %d vertices." % len(single_path)
-
-            generate_file("out", all_paths)
+        generate_file("out", all_paths)
 
         thetas_file.close()
 
