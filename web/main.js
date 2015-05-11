@@ -6,11 +6,12 @@ require.config({
     paths: {
         "jquery": "vendor/jquery-2.1.4.min",
         "underscore": "vendor/underscore-min",
-        "Hashtable": "vendor/Hashtable"
+        "Hashtable": "vendor/Hashtable",
+        "sprintf": "vendor/sprintf"
     }
 });
 
-require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config"], function ($, log, Model, Render, Vector3, outliner, config) {
+require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer"], function ($, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer) {
     var $canvas = $("canvas");
 
     Model.load("models/new_knight_baseclean_sym.json", function (model) {
@@ -38,6 +39,17 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config"], f
                                        config.FINAL_Y*config.DPI);
 
         $("body").append(render.canvas);
+
+        var doc = new Document("untitled");
+        var dpi = doc.getResolution();
+        paths.each(function (path) {
+            var cut = new Cut(path, 4, 100, 50);
+            doc.addCut(cut);
+        });
+        var buf = new Buffer();
+        epilog.generatePrn(buf, doc);
+        var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri()).text("Click to download PRN file");
+        $("body").append($a);
     }, function (error) {
         log.warn("Error loading model: " + error);
     });

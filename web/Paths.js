@@ -11,6 +11,10 @@ define(["underscore", "log", "Path"], function (_, log, Path) {
         this.paths.push(path);
     };
 
+    Paths.prototype.each = function (callback) {
+        _.each(this.paths, callback);
+    };
+
     Paths.prototype.getLength = function () {
         return this.paths.length;
     };

@@ -47,12 +47,12 @@ define(["underscore", "log", "Vector2", "Hashtable", "Path", "Paths"], function 
         var height = render.canvas.height;
         var data = render.ctx.getImageData(0, 0, width, height).data;
         var bytesPerPixel = 4;
-        var xxx = width*bytesPerPixel;
+        var stride = width*bytesPerPixel;
 
         for (var y = 0; y < height - 1; y++) {
-            var thisPixel = y*xxx;
+            var thisPixel = y*stride;
             var rightPixel = thisPixel + bytesPerPixel;
-            var downPixel = thisPixel + xxx;
+            var downPixel = thisPixel + stride;
 
             for (var x = 0; x < width - 1; x++) {
                 // Don't compare alpha.

@@ -39,6 +39,22 @@ define(["underscore"], function (_) {
         return this.vertices.length;
     };
 
+    // Returns an array of Path objects where every Path is at most
+    // maxVertices. Each path overlaps by one vertex.
+    Path.prototype.breakIntoSections = function (maxVertices) {
+        var paths = [];
+        var begin = 0;
+        var end = this.vertices.length;
+
+        while (begin < end) {
+            var length = Math.min(end - begin, maxVertices);
+            paths.push(new Path(this.vertices.slice(begin, begin + length)));
+            begin += maxVertices - 1;
+        }
+
+        return paths;
+    };
+
     Path.prototype.deleteLastVertex = function () {
         this.vertices.splice(this.vertices.length - 1, 1);
     };
