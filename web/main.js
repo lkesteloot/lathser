@@ -28,9 +28,10 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         var size = bbox3d.size();
         var maxSize = Math.max(size.x, size.y);
         var scale = config.MODEL_DIAMETER / maxSize * config.DPI;
+        var angle = 0; // Use 0.73 to make a hole.
 
         var light = (new Vector3(-1, 1, 1)).normalized();
-        var render = Render.make(model, 1024, 1024, 0, null);
+        var render = Render.make(model, 1024, 1024, angle, null);
         render.addBase();
         var paths = outliner.findOutlines(render);
         paths.simplify(1);
