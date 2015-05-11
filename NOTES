@@ -77,7 +77,8 @@ Web rewrite:
         * Render (unlit).
 =====>  - Add shade (spiral).
         * Add base.
-        - Add kerf.
+        * Add kerf.
+        - Clear top.
         * Generate outlines.
         * Simplify vertices.
         * Transform vertices.

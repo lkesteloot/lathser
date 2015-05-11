@@ -33,6 +33,15 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         var light = (new Vector3(-1, 1, 1)).normalized();
         var render = Render.make(model, 1024, 1024, angle, null);
         render.addBase();
+
+        // Expand to take into account the kerf.
+        var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale*config.DPI
+        if (true) { // shadePercent != 0) {
+            // Rough cut, add some spacing so we don't char the wood.
+            kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale*config.DPI
+        }
+        render.addKerf(kerfRadius);
+
         var paths = outliner.findOutlines(render);
         paths.simplify(1);
         paths.draw(render.ctx);

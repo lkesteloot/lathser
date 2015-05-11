@@ -18,7 +18,13 @@ define([], function () {
         // Final position of model in inches. The rig centers
         // the rod at 1.25 inches from the left.
         FINAL_X: 1.25 - LASER_OFFSET_X,
-        FINAL_Y: 1
+        FINAL_Y: 1,
+
+        // The radius of the laser kerf, in inches.
+        KERF_RADIUS_IN: 0.002,
+
+        // Extra spacing for rough cuts, in inches.
+        ROUGH_EXTRA_IN: 1/16.0
     };
 
     config.MODEL_DIAMETER = config.ROD_DIAMETER*(1 - config.MARGIN);

@@ -2,7 +2,7 @@
 
 'use strict';
 
-define(["log", "BoundingBox2D", "Transform"], function (log, BoundingBox2D, Transform) {
+define(["log", "sprintf", "BoundingBox2D", "Transform"], function (log, sprintf, BoundingBox2D, Transform) {
     var Render = function (canvas, ctx, transform) {
         this.canvas = canvas;
         this.ctx = ctx;
@@ -41,6 +41,38 @@ define(["log", "BoundingBox2D", "Transform"], function (log, BoundingBox2D, Tran
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(0, height - baseHeight, width, baseHeight);
         this.ctx.restore();
+    };
+
+    // Extend the shape in the image by the radius.
+    Render.prototype.addKerf = function (radius) {
+        log.info(sprintf.sprintf("Adding kerf of radius %.2f", radius));
+
+        var width = this.canvas.width;
+        var height = this.canvas.height;
+        var imageData = this.ctx.getImageData(0, 0, width, height);
+
+        // Make a copy of the original image.
+        var canvasCopy = document.createElement("canvas");
+        canvasCopy.width = width;
+        canvasCopy.height = height;
+        var ctxCopy = canvasCopy.getContext("2d");
+        ctxCopy.putImageData(imageData, 0, 0);
+
+        // Draw the original image in a circle. This won't work
+        // for very thin lines or points. We could fill in the
+        // circle if we wanted.
+        for (var t = 0; t < 2*Math.PI; t += 0.1) {
+            var dx = Math.cos(t)*radius;
+            var dy = Math.sin(t)*radius;
+            this.ctx.drawImage(canvasCopy, dx, dy);
+        }
+
+        // Get another dump. This can take a while if the above operations
+        // are still queued up and we want to count all that are part of
+        // our own time.
+        imageData = this.ctx.getImageData(0, 0, width, height);
+
+        log.info("Finished adding kerf");
     };
 
     // Return a Render object of the model in an image of the width and
