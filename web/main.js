@@ -31,6 +31,7 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
 
         var light = (new Vector3(-1, 1, 1)).normalized();
         var render = Render.make(model, 1024, 1024, 0, null);
+        render.addBase();
         var paths = outliner.findOutlines(render);
         paths.simplify(1);
         paths.draw(render.ctx);
