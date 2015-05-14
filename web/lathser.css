@@ -6,3 +6,7 @@ body {
     background-color: #262;
     background-color: black;
 }
+
+canvas {
+    display: block;
+}

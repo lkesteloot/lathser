@@ -24,7 +24,12 @@ define([], function () {
         KERF_RADIUS_IN: 0.002,
 
         // Extra spacing for rough cuts, in inches.
-        ROUGH_EXTRA_IN: 1/16.0
+        ROUGH_EXTRA_IN: 1/16.0,
+
+        PASS_SHADES: [80, 40, 0],
+
+        // Number of cuts around the circle.
+        ANGLE_COUNT: 16
     };
 
     config.MODEL_DIAMETER = config.ROD_DIAMETER*(1 - config.MARGIN);

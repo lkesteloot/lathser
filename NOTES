@@ -71,18 +71,7 @@ Models:
 Web rewrite:
 
     - Table stakes:
-        * Load model from JSON.
-        * Add bbox stuff (2D and 3D).
-        * Render (lit).
-        * Render (unlit).
-        * Add shade (spiral).
-        * Add base.
-        * Add kerf.
-        * Clear top.
-        * Generate outlines.
-        * Simplify vertices.
-        * Transform vertices.
-        * Generate PRN.
+        - Get DPI right. Maybe do it all in inches until the output stage.
         - Generate SVG.
     - Also:
         - Load model from Dropbox or web.
