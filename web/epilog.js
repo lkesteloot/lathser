@@ -269,7 +269,7 @@ define(["sprintf", "log"], function (sprintf, log) {
             out.write(SEP);
 
             doc.eachCut(function (cut) {
-                generateCut(out, cut);
+                generateCut(out, doc, cut);
             });
 
             // Footer for the cut.
@@ -348,7 +348,9 @@ define(["sprintf", "log"], function (sprintf, log) {
         */
     };
 
-    var generateCut = function (out, cut) {
+    var generateCut = function (out, doc, cut) {
+        var dpi = doc.getResolution();
+
         // We cut the points into spans of at most 100 points.
         _.each(cut.path.breakIntoSections(100), function (path) {
             out.write(sprintf.sprintf(V_POWER, cut.power));
@@ -366,13 +368,13 @@ define(["sprintf", "log"], function (sprintf, log) {
             // Move to the first point.
             var firstVertex = path.vertices[0];
             out.write(HPGL_PEN_UP);
-            out.write(sprintf.sprintf("%d,%d", firstVertex.x, firstVertex.y));
+            out.write(sprintf.sprintf("%d,%d", firstVertex.x*dpi, firstVertex.y*dpi));
             out.write(SEP);
 
             // Draw the rest of the points.
             out.write(HPGL_PEN_DOWN);
             var pairs = _.map(path.vertices.slice(1), function (v) {
-                return sprintf.sprintf("%d,%d", v.x, v.y);
+                return sprintf.sprintf("%d,%d", v.x*dpi, v.y*dpi);
             });
             out.write(pairs.join(","));
             out.write(SEP);

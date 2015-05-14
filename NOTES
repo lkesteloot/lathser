@@ -71,7 +71,6 @@ Models:
 Web rewrite:
 
     - Table stakes:
-        - Get DPI right. Maybe do it all in inches until the output stage.
         - Generate SVG.
     - Also:
         - Load model from Dropbox or web.

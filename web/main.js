@@ -26,6 +26,8 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
     };
 
     var generatePasses = function (callback) {
+        callback(0, 0);
+        return;
         _.each(config.PASS_SHADES, function (shadePercent) {
             _.each(halfList(angles(config.ANGLE_COUNT)), function (angle) {
                 callback(shadePercent, angle);
@@ -45,11 +47,10 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         // Find scaling factor.
         var size = bbox3d.size();
         var maxSize = Math.max(size.x, size.y);
-        var scale = config.MODEL_DIAMETER / maxSize * config.DPI;
+        var scale = config.MODEL_DIAMETER / maxSize;
 
         var light = (new Vector3(-1, 1, 1)).normalized();
         var doc = new Document("untitled");
-        var dpi = doc.getResolution();
         var angle = 0; // Use 0.73 to make a hole.
 
         generatePasses(function (shadePercent, angle) {
@@ -59,15 +60,15 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
             // Add the shade (for spiraling). The "transform" converts from
             // model units to raster coordinates. "scale" converts from
             // model units to dots. DPI converts from inches to dots.
-            var shadeWidth = config.ROD_DIAMETER*shadePercent/100.0*render.transform.scale/scale*config.DPI;
+            var shadeWidth = config.ROD_DIAMETER*shadePercent/100.0*render.transform.scale/scale;
             var shadeCenterX = render.transform.offx;
             render.addShade(shadeWidth, shadeCenterX);
 
             // Expand to take into account the kerf.
-            var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale*config.DPI
+            var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale;
             if (shadePercent != 0 && false) {
                 // Rough cut, add some spacing so we don't char the wood.
-                kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale*config.DPI
+                kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale;
             }
             render.addKerf(kerfRadius);
 
@@ -79,9 +80,7 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
             var paths = outliner.findOutlines(render);
             paths.simplify(1);
             paths.draw(render.ctx);
-            paths = paths.transformInverse(render.transform, scale,
-                                           config.FINAL_X*config.DPI,
-                                           config.FINAL_Y*config.DPI);
+            paths = paths.transformInverse(render.transform, scale, config.FINAL_X, config.FINAL_Y);
 
             $("body").append(render.canvas);
 

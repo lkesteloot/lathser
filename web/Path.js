@@ -3,19 +3,22 @@
 'use strict';
 
 define(["underscore"], function (_) {
+    // Path vertices are always in inches.
     var Path = function (vertices) {
         this.vertices = vertices || [];
     };
 
+    // Path vertices are always in inches.
     Path.prototype.addVertex = function (v) {
         this.vertices.push(v);
     };
 
+    // Append the path to this one.
     Path.prototype.addPath = function (other) {
         Array.prototype.push.apply(this.vertices, other.vertices);
     };
 
-    // Reverse the path in-place.
+    //Path vertices are always in inches. Reverse the path in-place.
     Path.prototype.reverse = function () {
         this.vertices.reverse();
     };
