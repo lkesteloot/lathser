@@ -73,19 +73,28 @@ Web rewrite:
     - Table stakes:
         * Load model from JSON.
         * Add bbox stuff (2D and 3D).
-        - Render (lit).
-        - Render (unlit).
-        - Add shade (spiral).
-        - Add base.
-        - Add kerf.
-        - Generate outlines.
-        - Simplify vertices.
-        - Transform vertices.
-        - General PRN.
+        * Render (lit).
+        * Render (unlit).
+        * Add shade (spiral).
+        * Add base.
+        * Add kerf.
+        * Clear top.
+        * Generate outlines.
+        * Simplify vertices.
+        * Transform vertices.
+        * Generate PRN.
         - Generate SVG.
     - Also:
         - Load model from Dropbox or web.
         - Save PRN or SVG to Dropbox or download.
         - Display model in 3D.
         - Display paths and cuts in 3D.
+    - General UI:
+        - Choose model.
+        - Choose parameters.
+            - Number of angles.
+            - Shades.
+        - Generate all images and cuts.
+        - Preview them all with a slider.
+        - Download PRN file.
 

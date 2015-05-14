@@ -58,5 +58,24 @@ define([], function () {
             Math.max(this.y, other.y));
     };
 
+    // Rotated 90 counter-clockwise.
+    Vector2.prototype.reciprocal = function () {
+        return new Vector2(-this.y, this.x);
+    };
+
+    Vector2.prototype.hashCode = function () {
+        // From Effective Java, except he uses Float.floatToIntBits(), which we
+        // don't have, so we round to an integer. This will probably be fine
+        // for the numbers we deal with:
+        var result = 17;
+        result = 37*result + Math.floor(this.x);
+        result = 37*result + Math.floor(this.y);
+        return result;
+    };
+
+    Vector2.prototype.equals = function (other) {
+        return this.x === other.x && this.y === other.y;
+    };
+
     return Vector2;
 });
