@@ -43,6 +43,28 @@ define(["log", "sprintf", "BoundingBox2D", "Transform"], function (log, sprintf,
         this.ctx.restore();
     };
 
+    // Draw a rectangle of width "shadeWidth" down the middle of the image
+    // so we can spiral into the rod.
+    Render.prototype.addShade = function (shadeWidth, shadeCenterX) {
+        var height = this.canvas.height;
+        var startX = shadeCenterX - shadeWidth/2
+
+        this.ctx.save();
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(startX, 0, shadeWidth, height);
+        this.ctx.restore();
+    };
+
+    // Set the top "size" pixels of the image.
+    Render.prototype.setTop = function (size) {
+        var width = this.canvas.width;
+
+        this.ctx.save();
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(0, 0, width, size);
+        this.ctx.restore();
+    };
+
     // Extend the shape in the image by the radius.
     Render.prototype.addKerf = function (radius) {
         log.info(sprintf.sprintf("Adding kerf of radius %.2f", radius));

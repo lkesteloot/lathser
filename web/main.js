@@ -14,9 +14,10 @@ require.config({
 require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer"], function ($, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer) {
     var $canvas = $("canvas");
 
+    var shadePercent = 40;
+
     Model.load("models/new_knight_baseclean_sym.json", function (model) {
         log.info("Successfully loaded model");
-        log.info(model);
 
         var bbox3d = model.getBoundingBox();
         var center = bbox3d.center();
@@ -34,13 +35,25 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         var render = Render.make(model, 1024, 1024, angle, null);
         render.addBase();
 
+        // Add the shade (for spiraling). The "transform" converts from
+        // model units to raster coordinates. "scale" converts from
+        // model units to dots. DPI converts from inches to dots.
+        var shadeWidth = config.ROD_DIAMETER*shadePercent/100.0*render.transform.scale/scale*config.DPI;
+        var shadeCenterX = render.transform.offx;
+        render.addShade(shadeWidth, shadeCenterX);
+
         // Expand to take into account the kerf.
         var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale*config.DPI
-        if (true) { // shadePercent != 0) {
+        if (shadePercent != 0 && false) {
             // Rough cut, add some spacing so we don't char the wood.
             kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale*config.DPI
         }
         render.addKerf(kerfRadius);
+
+        // Cut off the sides when we're shading.
+        if (shadePercent > 0) {
+            render.setTop(2);
+        }
 
         var paths = outliner.findOutlines(render);
         paths.simplify(1);
@@ -59,7 +72,7 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         });
         var buf = new Buffer();
         epilog.generatePrn(buf, doc);
-        var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri()).text("Click to download PRN file");
+        var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri("application/octet-stream")).text("Click to download PRN file");
         $("body").append($a);
     }, function (error) {
         log.warn("Error loading model: " + error);

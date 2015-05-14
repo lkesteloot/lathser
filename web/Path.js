@@ -17,13 +17,7 @@ define(["underscore"], function (_) {
 
     // Reverse the path in-place.
     Path.prototype.reverse = function () {
-        var len = this.vertices.length;
-
-        for (var i = 0; i < len/2; i++) {
-            var tmp = this.vertices[i];
-            this.vertices[i] = this.vertices[len - 1 - i];
-            this.vertices[len - 1 - i] = tmp;
-        }
+        this.vertices.reverse();
     };
 
     // Return the last vertex in the path, or null if the path is empty.
