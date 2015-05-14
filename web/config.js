@@ -29,7 +29,7 @@ define([], function () {
         // Extra spacing for rough cuts, in inches.
         ROUGH_EXTRA_IN: 1/16.0,
 
-        PASS_SHADES: [90, 40, 0],
+        PASS_SHADES: [80, 40, 0],
 
         // Number of cuts around the circle.
         ANGLE_COUNT: 16

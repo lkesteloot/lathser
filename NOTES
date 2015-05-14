@@ -81,6 +81,10 @@ Web rewrite:
     - Also:
         - Support raster on Epilog.
         - Load model from Dropbox or web.
+        - Save parameters with each model:
+            - Initial model rotation.
+            - Shade numbers.
+            - Raster passes and angles.
         - Save PRN or SVG to Dropbox or download.
         - Display model in 3D.
         - Display paths and cuts in 3D.

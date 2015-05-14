@@ -7,6 +7,10 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"]
         this.triangles = triangles;
     };
 
+    Model.prototype.getTriangleCount = function () {
+        return this.triangles.length;
+    };
+
     Model.prototype.getBoundingBox = function () {
         var bbox3d = new BoundingBox3D();
         _.each(this.triangles, function (triangle) {
@@ -26,13 +30,13 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"]
      * The success callback is passed a Model object. The error callback is passed
      * a string.
      */
-    Model.load = function (pathname, successCallback, errorCallback) {
+    Model.load = function (pathname, rotationCount, successCallback, errorCallback) {
         log.info("Loading " + pathname);
 
         $.ajax(pathname, {
             dataType: "json",
             success: function (data) {
-                var model = Model.parseJson(data);
+                var model = Model.parseJson(data, rotationCount);
                 successCallback(model);
             },
             error: function (xhr, textStatus) {
@@ -41,7 +45,7 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"]
         });
     };
 
-    Model.parseJson = function (data) {
+    Model.parseJson = function (data, rotationCount) {
         var triangles = [];
 
         // We don't care about meshes, so we just generate a single
@@ -69,8 +73,6 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"]
             }));
         });
 
-        // XXX Model-dependant. Not sure where to store this.
-        var rotationCount = 3;
         // We need the model to be around Z. If it's around Y, transform
         // the initial geometry so that the rest of the program doesn't
         // have to concern itself with it.

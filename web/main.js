@@ -84,8 +84,14 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
             return new Cut(path, speed, 1, 50);
         };
 
-        Model.load("models/new_knight_baseclean_sym.json", function (model) {
-            log.info("Successfully loaded model");
+        var filename;
+        var rotationCount;
+
+        filename = "DNA.json"; rotationCount = 2;
+        filename = "new_knight_baseclean_sym.json"; rotationCount = 3;
+
+        Model.load("models/" + filename, rotationCount,function (model) {
+            log.info("Successfully loaded model (" + model.getTriangleCount() + " triangles)");
 
             var bbox3d = model.getBoundingBox();
             var center = bbox3d.center();
@@ -115,7 +121,7 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
 
                 // Expand to take into account the kerf.
                 var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale;
-                if (shadePercent != 0 && false) {
+                if (shadePercent != 0) {
                     // Rough cut, add some spacing so we don't char the wood.
                     kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale;
                 }
