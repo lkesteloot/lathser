@@ -110,9 +110,8 @@ void setup(void)
 }
 
 void acknowlageBLE(void)
-{
-  Serial.println("*");
-  sendStringBT(&String("*"));
+{  
+  sendResponseStringBT(&String(""));
 }
 
 void setLed(char ledState)
@@ -125,7 +124,7 @@ void sendThermalSensorValue(boolean isResponse)
 {
   int thermalValue =  averagedThermalReading();
   if (isResponse) {
-    sendStringBT(&String("*TEMP " + String(thermalValue)));
+    sendResponseStringBT(&String("TEMP " + String(thermalValue)));
   } else {
     sendStringBT(&String("TEMP " + String(thermalValue)));
   }
@@ -200,7 +199,21 @@ void sendStringBT(String *s)
   
     uint8_t sendbuffer[32];
     s->getBytes(sendbuffer, 32);
-    char sendbuffersize = min(20, s->length());
+    char sendbuffersize = min(32, s->length());
+     BTLEserial.write(sendbuffer, sendbuffersize);
+     blePoll();
+}
+
+void sendResponseStringBT(String *s)
+{
+ if (gStatus != ACI_EVT_CONNECTED) {
+      return;
+    }
+
+    uint8_t sendbuffer[33];
+    sendbuffer[0] = '*';
+    s->getBytes(&(sendbuffer[1]), 32);
+    char sendbuffersize = min(33, s->length() + 1);
      BTLEserial.write(sendbuffer, sendbuffersize);
      blePoll();
 }
@@ -329,7 +342,7 @@ void sequenceLoop()
 	  acknowlageBLE();
 	  gPositionArrayIndex--;
 	} else {
-	  sendStringBT(&String("*ignored"));
+	  sendResponseStringBT(&String("ignored"));
 	  Serial.println("  Ignoring");
 	}
       } else if (commandChar == 'n') {
@@ -337,7 +350,7 @@ void sequenceLoop()
 	  acknowlageBLE();
 	  gPositionArrayIndex++;
 	} else {
-	  sendStringBT(&String("*ignoring"));
+	  sendResponseStringBT(&String("ignoring"));
 	  Serial.println("  Ignoring");
 	}
       } else if (commandChar == 'q') {
@@ -378,7 +391,7 @@ void commandLoop()
 	gPositionArray[gPositionArraySize++] = position;
 	acknowlageBLE();
       } else {
-	sendStringBT(&String("*tomany"));
+	sendResponseStringBT(&String("tomany"));
 	Serial.println("error too many positions");
       }
     } else if (commandChar == 's') {

@@ -85,7 +85,10 @@
            @1.5708,
            @1.9635,
            @2.35619,
-           @2.74889]];
+           @2.74889,
+           @1.5708,      // These two are for left hand/right hand sillouette raster positioning.
+           @(-1.5708),
+           ]];
         self.sequenceName = @"Default";
     }
 
