@@ -19,15 +19,6 @@ define([], function () {
         this.rasters.push(raster);
     };
 
-    // Pixels per inch.
-    Document.prototype.getResolution = function () {
-        // Max this out because we can only generate integer cut points.
-        // return 1200
-
-        // Match Fusion default.
-        return 600;
-    };
-
     // Whether this doc has engravings (raster).
     Document.prototype.getEnableEngraving = function () {
         return this.rasters.length > 0;
@@ -50,14 +41,14 @@ define([], function () {
         return true;
     };
 
-    // Bed size.
+    // Bed size in inches.
     Document.prototype.getWidth = function () {
-        return 32*this.getResolution();
+        return 32;
     };
 
-    // Bed size.
+    // Bed size in inches.
     Document.prototype.getHeight = function () {
-        return 20*this.getResolution();
+        return 20;
     };
 
     Document.prototype.getAutoFocus = function () {

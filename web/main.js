@@ -11,7 +11,7 @@ require.config({
     }
 });
 
-require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer"], function ($, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer) {
+require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer", "svg"], function ($, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer, svg) {
 
     // Return "count" angles (in radians) going around the circle.
     var angles = function (count) {
@@ -93,6 +93,11 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         var buf = new Buffer();
         epilog.generatePrn(buf, doc);
         var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri("application/octet-stream")).text("Click to download PRN file");
+        $("body").append($a);
+
+        var buf = new Buffer();
+        svg.generateSvg(buf, doc);
+        var $a = $("<a>").attr("download", "out.svg").attr("href", buf.toDataUri("image/svg+xml")).text("Click to download SVG file");
         $("body").append($a);
     }, function (error) {
         log.warn("Error loading model: " + error);

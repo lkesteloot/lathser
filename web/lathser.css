@@ -10,3 +10,8 @@ body {
 canvas {
     display: block;
 }
+
+a {
+    display: block;
+    color: white;
+}

@@ -10,6 +10,10 @@ define(["sprintf", "log"], function (sprintf, log) {
     // been tested.
     var FUSION = true;
 
+    // Match Fusion default. Max is 1200, which would give us more resolution since
+    // the points are integers.
+    var DPI = 600;
+
     var SEP = ";";
 
     // PJL COMMANDS
@@ -165,7 +169,6 @@ define(["sprintf", "log"], function (sprintf, log) {
     var HPGL_END = "\x1B%0B";
 
     var generatePrn = function (out, doc) {
-        var resolution = doc.getResolution();
         var enableEngraving = doc.getEnableEngraving();
         var enableCut = doc.getEnableCut();
         var centerEngrave = doc.getCenterEngrave();
@@ -174,8 +177,8 @@ define(["sprintf", "log"], function (sprintf, log) {
         // Match my sample output. Doesn't matter right now anyway.
         var rasterPower = 50;
         var rasterSpeed = 50;
-        var width = doc.getWidth();
-        var height = doc.getHeight();
+        var width = doc.getWidth()*DPI;
+        var height = doc.getHeight()*DPI;
 
         // Printer job language header.
         out.write(sprintf.sprintf(PJL_HEADER, doc.getTitle()));
@@ -206,7 +209,7 @@ define(["sprintf", "log"], function (sprintf, log) {
         out.write(sprintf.sprintf(PCL_OFF_Y, 0));
 
         // Resolution of the print.
-        out.write(sprintf.sprintf(PCL_PRINT_RESOLUTION, resolution));
+        out.write(sprintf.sprintf(PCL_PRINT_RESOLUTION, DPI));
 
         // X position = 0
         out.write(sprintf.sprintf(PCL_POS_X, 0));
@@ -215,7 +218,7 @@ define(["sprintf", "log"], function (sprintf, log) {
         out.write(sprintf.sprintf(PCL_POS_Y, 0));
 
         // PCL resolution.
-        out.write(sprintf.sprintf(PCL_RESOLUTION, resolution));
+        out.write(sprintf.sprintf(PCL_RESOLUTION, DPI));
 
         // Raster Orientation. 0 = logical page, 3 = physical page.
         out.write(sprintf.sprintf(R_ORIENTATION, 0));
@@ -242,16 +245,8 @@ define(["sprintf", "log"], function (sprintf, log) {
         out.write(sprintf.sprintf(PCL_RASTER_AIR_ASSIST, airAssist ? 2 : 0));
 
         // Size of the bed.
-        var bedWidth, bedHeight;
-        if (FUSION) {
-            bedWidth = 32*resolution;
-            bedHeight = 20*resolution;
-        } else {
-            bedWidth = 24*resolution;
-            bedHeight = 18*resolution;
-        }
-        out.write(sprintf.sprintf(R_BED_HEIGHT, bedHeight));
-        out.write(sprintf.sprintf(R_BED_WIDTH, bedWidth));
+        out.write(sprintf.sprintf(R_BED_HEIGHT, height));
+        out.write(sprintf.sprintf(R_BED_WIDTH, width));
 
         // Raster compression.
         out.write(sprintf.sprintf(R_COMPRESSION, 2));
@@ -349,8 +344,6 @@ define(["sprintf", "log"], function (sprintf, log) {
     };
 
     var generateCut = function (out, doc, cut) {
-        var dpi = doc.getResolution();
-
         // We cut the points into spans of at most 100 points.
         _.each(cut.path.breakIntoSections(100), function (path) {
             out.write(sprintf.sprintf(V_POWER, cut.power));
@@ -368,13 +361,13 @@ define(["sprintf", "log"], function (sprintf, log) {
             // Move to the first point.
             var firstVertex = path.vertices[0];
             out.write(HPGL_PEN_UP);
-            out.write(sprintf.sprintf("%d,%d", firstVertex.x*dpi, firstVertex.y*dpi));
+            out.write(sprintf.sprintf("%d,%d", firstVertex.x*DPI, firstVertex.y*DPI));
             out.write(SEP);
 
             // Draw the rest of the points.
             out.write(HPGL_PEN_DOWN);
             var pairs = _.map(path.vertices.slice(1), function (v) {
-                return sprintf.sprintf("%d,%d", v.x*dpi, v.y*dpi);
+                return sprintf.sprintf("%d,%d", v.x*DPI, v.y*DPI);
             });
             out.write(pairs.join(","));
             out.write(SEP);
