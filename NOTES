@@ -34,6 +34,14 @@ Notes:
         - Make JSON output.
     - Name: Lathser (/lathe-zer/)
     - http://en.wikipedia.org/wiki/Visual_hull
+    - To forward ports from hitch to local:
+        - Add this to /etc/ssh/sshd_config on server:
+            # LK: Allow ssh to forward ports.
+            GatewayPorts clientspecified
+        - Then locally:
+            ssh -R :8000:localhost:8000 lk@hitch.headcode.com
+        - Then hit:
+            http://hitch.headcode.com:8000/lathser/
 
 Research:
 
@@ -70,9 +78,8 @@ Models:
 
 Web rewrite:
 
-    - Table stakes:
-        - Generate SVG.
     - Also:
+        - Support raster on Epilog.
         - Load model from Dropbox or web.
         - Save PRN or SVG to Dropbox or download.
         - Display model in 3D.
