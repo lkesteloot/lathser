@@ -78,7 +78,7 @@ Models:
 
 Web rewrite:
 
-    - Also:
+    - To do:
         - Support raster on Epilog.
         - Load model from Dropbox or web.
         - Save parameters with each model:

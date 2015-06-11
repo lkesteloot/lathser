@@ -3,15 +3,21 @@
 
 require.config({
     urlArgs: "bust=" + (new Date()).getTime(),
+    shim: {
+        "three": {
+            exports: "THREE"
+        }
+    },
     paths: {
         "jquery": "vendor/jquery-2.1.4.min",
         "underscore": "vendor/underscore-min",
         "Hashtable": "vendor/Hashtable",
-        "sprintf": "vendor/sprintf"
+        "sprintf": "vendor/sprintf",
+        "three": "vendor/three.min"
     }
 });
 
-require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer", "svg", "Path", "Vector2"], function ($, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer, svg, Path, Vector2) {
+require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer", "svg", "Path", "Vector2", "three"], function ($, _, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer, svg, Path, Vector2, THREE) {
 
     var start = function () {
         // Return "count" angles (in radians) going around the circle.
@@ -90,7 +96,7 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         filename = "DNA.json"; rotationCount = 2;
         filename = "new_knight_baseclean_sym.json"; rotationCount = 3;
 
-        Model.load("models/" + filename, rotationCount,function (model) {
+        Model.load("models/" + filename, rotationCount, function (model) {
             log.info("Successfully loaded model (" + model.getTriangleCount() + " triangles)");
 
             var bbox3d = model.getBoundingBox();
@@ -161,5 +167,95 @@ require(["jquery", "log", "Model", "Render", "Vector3", "outliner", "config", "D
         });
     };
 
-    $("#startButton").click(start);
+    var threeTest = function () {
+        var width = 600;
+        var height = 600;
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(width, height);
+        document.body.appendChild(renderer.domElement);
+
+        var centerOfScene = new THREE.Vector3(0, 0, 0);
+        var camera = new THREE.PerspectiveCamera(45, width/height, 10, 10000);
+        camera.position.x = centerOfScene.x + 1300;
+        camera.position.y = centerOfScene.y + 1300;
+        camera.position.z = centerOfScene.z + 1300;
+        camera.lookAt(centerOfScene);
+
+        var pathname = "models/new_knight_baseclean_sym.json";
+        $.ajax(pathname, {
+            dataType: "json",
+            success: function (data) {
+                var scene = new THREE.Scene();
+
+                var objs = [];
+
+                _.each(data.meshes, function (mesh) {
+                    var geometry = new THREE.Geometry();
+                    var scale = 40;
+                    for (var i = 0; i < mesh.vertices.length; i += 3) {
+                        geometry.vertices.push(new THREE.Vector3(
+                            mesh.vertices[i + 0]*scale,
+                            mesh.vertices[i + 1]*scale,
+                            mesh.vertices[i + 2]*scale));
+                    }
+                    for (var i = 0; i < mesh.faces.length; i++) {
+                        geometry.faces.push(new THREE.Face3(
+                            mesh.faces[i][0],
+                            mesh.faces[i][1],
+                            mesh.faces[i][2]));
+                    }
+                    geometry.computeFaceNormals();
+                    geometry.computeBoundingSphere();
+                    geometry.computeBoundingBox();
+
+                    var material = new THREE.MeshLambertMaterial({
+                        color: 0xffffff,
+                        shading: THREE.FlatShading
+                    });
+
+                    var obj = new THREE.Mesh(geometry, material);
+                    objs.push(obj);
+                    scene.add(obj);
+                });
+
+                var light = new THREE.DirectionalLight(0xffffff);
+                light.position.set(0, 0, 300);
+                // light.target = mesh;
+                scene.add(light);
+
+                light = new THREE.DirectionalLight(0xffffff);
+                light.position.set(0, 0, -300);
+                // light.target = mesh;
+                scene.add(light);
+
+                var render = function () {
+                    requestAnimationFrame(render);
+                    objs[0].rotation.x += 0.01;
+                    objs[0].rotation.z += 0.02;
+                    renderer.render(scene, camera);
+                };
+                render();
+            }
+        });
+    };
+
+    var loadModel = function () {
+        var filename;
+        var rotationCount;
+
+        filename = "DNA.json"; rotationCount = 2;
+        filename = "new_knight_baseclean_sym.json"; rotationCount = 3;
+
+        Model.load("models/" + filename, rotationCount, function (model) {
+        });
+    };
+
+    var main = function () {
+        $("#startButton").click(start);
+        $("#threeTest").click(threeTest);
+
+        loadModel();
+    };
+
+    main();
 });

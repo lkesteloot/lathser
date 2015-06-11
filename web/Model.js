@@ -3,7 +3,8 @@
 'use strict';
 
 define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"], function ($, _, log, Triangle3D, Vector3, BoundingBox3D) {
-    var Model = function (triangles) {
+    var Model = function (data, triangles) {
+        this.data = data;
         this.triangles = triangles;
     };
 
@@ -82,7 +83,7 @@ define(["jquery", "underscore", "log", "Triangle3D", "Vector3", "BoundingBox3D"]
             });
         });
 
-        return new Model(triangles);
+        return new Model(data, triangles);
     };
 
     return Model;
