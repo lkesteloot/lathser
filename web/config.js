@@ -5,8 +5,8 @@
 define([], function () {
     // Make this negative if the zero point is off the bed, positive
     // if it's inside the bed.
-    var LASER_OFFSET_X = -0.034;
-    var LASER_OFFSET_Y = 0.041;
+    var LASER_OFFSET_X = 0.053 - 0.100;
+    var LASER_OFFSET_Y = 0.117 - 0.100;
 
     var config = {
         // Dots per inch in the SVG file. Don't change this.
@@ -28,6 +28,9 @@ define([], function () {
 
         // Extra spacing for rough cuts, in inches.
         ROUGH_EXTRA_IN: 1/16.0,
+
+        // Extra spacing for rough cuts on last pass, in inches.
+        ROUGH_EXTRA_LAST_IN: 1/20.0,
 
         PASS_SHADES: [80, 40, 0],
 

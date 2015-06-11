@@ -55,12 +55,12 @@ define(["log", "sprintf", "BoundingBox2D", "Transform"], function (log, sprintf,
         this.ctx.restore();
     };
 
-    // Set the top "size" pixels of the image.
-    Render.prototype.setTop = function (size) {
+    // Set the top "size" pixels of the image to the specified color.
+    Render.prototype.setTop = function (size, color) {
         var width = this.canvas.width;
 
         this.ctx.save();
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = color;
         this.ctx.fillRect(0, 0, width, size);
         this.ctx.restore();
     };

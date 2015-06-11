@@ -251,12 +251,14 @@ define(["sprintf", "log"], function (sprintf, log) {
         // Raster compression.
         out.write(sprintf.sprintf(R_COMPRESSION, 2));
 
+        // Do the raster passes.
         if (enableEngraving) {
             doc.eachRaster(function (raster) {
                 generateRaster(out, raster);
             });
         }
 
+        // Do the vector passes.
         if (enableCut) {
             // Header for the cut.
             out.write(HPGL_START);
@@ -291,56 +293,77 @@ define(["sprintf", "log"], function (sprintf, log) {
     };
 
     var generateRaster = function (out, raster) {
-        /*
         // Raster direction.
         out.write(sprintf.sprintf(R_DIRECTION, 0));
 
         // Start this raster.
         out.write(R_START);
 
-        // Size of image.
-        width, height = raster.image.size
+        // Grab raw data.
+        var imageData = raster.imageData;
+        var data = imageData.data;
 
-        for row in range(height) {
+        // Size of image.
+        var width = imageData.width;
+        var height = imageData.height;
+
+        // Upper-left of image, in pixels.
+        var xPixels = Math.floor(raster.x*DPI);
+        var yPixels = Math.floor(raster.y*DPI);
+
+        // Width of output image in bytes.
+        var stride = Math.floor((width + 7) / 8);
+
+        // Start left-to-right, then switch every row.
+        var leftToRight = true;
+
+        for (var row = 0; row < height; row++) {
             // We're always doing the top-down direction.
-            y = raster.y + row
+            var y = yPixels + row;
 
             out.write(sprintf.sprintf(PCL_POS_Y, y));
-            out.write(sprintf.sprintf(PCL_POS_X, raster.x));
+            out.write(sprintf.sprintf(PCL_POS_X, yPixels));
 
             // XXX Restart (R_END - DIR - START) every 388 scanlines.
 
-            // Width of image in bytes.
-            width_in_bytes = (width + 7) / 8
+            var buf = "";
+            for (var byteIndex = 0; byteIndex < stride; byteIndex++) {
+                var beginColumn = byteIndex*8;
+                var endColumn = Math.min((byteIndex + 1)*8, width);
 
-            buf = ""
-            for byte_index in range(width_in_bytes) {
-                begin_col = byte_index*8
-                end_col = min((byte_index + 1)*8, width)
+                var bit = 128;
+                var ch = 0;
+                var dataIndex = (row*width + beginColumn)*4;
+                for (var column = beginColumn; column < endColumn; column++) {
+                    // Just look at red for now.
+                    var p = data[dataIndex];
+                    if (p > 128) {
+                        ch |= bit;
+                    }
+                    bit /= 2;
+                    dataIndex += 4;
+                }
+                buf += String.fromCharCode(ch)
+            }
 
-                bit = 128
-                ch = 0
-                for col in range(begin_col, end_col) {
-                    p = raster.image.getpixel((col, row))
-                    if p > 128 {
-                        ch |= bit
-                    bit /= 2
-                buf += chr(ch)
-
-            // Literal length.
-            buf = chr(len(buf) - 1) + buf
+            // Prepend literal length.
+            buf = String.fromCharCode(buf.length - 1) + buf;
 
             // Pad to multiple of 8.
-            while len(buf) % 8 != 0 {
-                buf += chr(0x80)
+            while (buf.length % 8 !== 0) {
+                buf += String.fromCharCode(0x80);
+            }
 
-            out.write(sprintf.sprintf(R_ROW_UNPACKED_BYTES, width_in_bytes));
-            out.write(sprintf.sprintf(R_ROW_PACKED_BYTES, len(buf)));
+            out.write(sprintf.sprintf(R_ROW_UNPACKED_BYTES, leftToRight ? stride : -stride));
+            out.write(sprintf.sprintf(R_ROW_PACKED_BYTES, buf.length));
             out.write(buf)
+
+            // Switch direction.
+            leftToRight = !leftToRight;
+        }
 
         // End this raster.
         out.write(R_END)
-        */
     };
 
     var generateCut = function (out, doc, cut) {

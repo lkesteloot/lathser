@@ -82,7 +82,7 @@ define([], function () {
         }.bind(this));
     };
 
-    /*
+    /* XXX
     Document.prototype.addPath = function (path) {
         cut = Cut(4, 100, 50)
         # Convert to doc's resolution.

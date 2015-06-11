@@ -17,9 +17,9 @@ require.config({
     }
 });
 
-require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer", "svg", "Path", "Vector2", "three"], function ($, _, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer, svg, Path, Vector2, THREE) {
+require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner", "config", "Document", "Cut", "epilog", "Buffer", "svg", "Path", "Vector2", "three", "Raster"], function ($, _, log, Model, Render, Vector3, outliner, config, Document, Cut, epilog, Buffer, svg, Path, Vector2, THREE, Raster) {
 
-    var start = function () {
+    var start = function (svgOutput) {
         // Return "count" angles (in radians) going around the circle.
         var angles = function (count) {
             return _.times(count, function (angle) {
@@ -32,7 +32,7 @@ require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner"
             return list.slice(0, list.length/2);
         };
 
-        // Return a list of {value, isLast} objects isLast is true only for the last item.
+        // Return a list of {value, isLast} objects; isLast is true only for the last item.
         var identifyLast = function (list) {
             return _.map(list, function (value, index) {
                 return {
@@ -43,7 +43,7 @@ require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner"
         };
 
         var generatePasses = function (callback) {
-            if (false) {
+            if (svgOutput) {
                 // Left and right face only.
                 callback(0, 0, false);
                 callback(0, Math.PI, false);
@@ -127,15 +127,30 @@ require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner"
 
                 // Expand to take into account the kerf.
                 var kerfRadius = config.KERF_RADIUS_IN*render.transform.scale/scale;
-                if (shadePercent != 0) {
-                    // Rough cut, add some spacing so we don't char the wood.
-                    kerfRadius += config.ROUGH_EXTRA_IN*render.transform.scale/scale;
+
+                // Add some spacing so we don't char the wood.
+                var roughExtraIn;
+                if (svgOutput) {
+                    roughExtraIn = 0;
+                } else {
+                    var profileAngle = angle % Math.PI;
+                    if (profileAngle < Math.PI/6 || profileAngle > Math.PI*5/6) {
+                        roughExtraIn = 0;
+                    } else if (shadePercent === 0) {
+                        roughExtraIn = config.ROUGH_EXTRA_LAST_IN;
+                    } else {
+                        roughExtraIn = config.ROUGH_EXTRA_IN;
+                    }
                 }
+                kerfRadius += roughExtraIn*render.transform.scale/scale;
                 render.addKerf(kerfRadius);
 
-                // Cut off the sides when we're shading.
-                if (shadePercent > 0) {
-                    render.setTop(2);
+                if (shadePercent === 0) {
+                    // Make sure top is cut off when not shading.
+                    render.setTop(2, "black");
+                } else {
+                    // Cut off the sides when we're shading.
+                    render.setTop(2, "white");
                 }
 
                 var paths = outliner.findOutlines(render);
@@ -154,17 +169,41 @@ require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner"
             });
 
             var buf = new Buffer();
-            epilog.generatePrn(buf, doc);
-            var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri("application/octet-stream")).text("Click to download PRN file");
-            $("body").append($a);
-
-            var buf = new Buffer();
-            svg.generateSvg(buf, doc);
-            var $a = $("<a>").attr("download", "out.svg").attr("href", buf.toDataUri("image/svg+xml")).text("Click to download SVG file");
+            var $a;
+            if (svgOutput) {
+                svg.generateSvg(buf, doc);
+                $a = $("<a>").attr("download", "out.svg").attr("href", buf.toDataUri("image/svg+xml")).text("Click to download SVG file");
+            } else {
+                epilog.generatePrn(buf, doc);
+                $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri("application/octet-stream")).text("Click to download PRN file");
+            }
             $("body").append($a);
         }, function (error) {
             log.warn("Error loading model: " + error);
         });
+    };
+
+    var rasterTest = function () {
+        var doc = new Document("untitled");
+
+        var canvas = document.createElement("canvas");
+        canvas.width = 200;
+        canvas.height = 200;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 200, 200);
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(100, 100, 80, 0, 2*Math.PI);
+        ctx.fill();
+
+        var raster = new Raster(ctx.getImageData(0, 0, 200, 200), 3, 3, 100, 100);
+        doc.addRaster(raster);
+
+        var buf = new Buffer();
+        epilog.generatePrn(buf, doc);
+        var $a = $("<a>").attr("download", "out.prn").attr("href", buf.toDataUri("application/octet-stream")).text("Click to download PRN file");
+        $("body").append($a);
     };
 
     var threeTest = function () {
@@ -251,8 +290,10 @@ require(["jquery", "underscore", "log", "Model", "Render", "Vector3", "outliner"
     };
 
     var main = function () {
-        $("#startButton").click(start);
-        $("#threeTest").click(threeTest);
+        $("#startPrnButton").click(function () { start(false); });
+        $("#startSvgButton").click(function () { start(true); });
+        $("#rasterTestButton").click(rasterTest);
+        $("#threeTestButton").click(threeTest);
 
         loadModel();
     };

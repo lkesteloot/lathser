@@ -7,6 +7,7 @@ define([], function () {
         this.parts = [];
     };
 
+    // Add a string to print.
     Buffer.prototype.write = function (s) {
         this.parts.push(s);
     };
