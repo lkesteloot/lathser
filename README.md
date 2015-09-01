@@ -13,6 +13,4 @@ built by Kurt:
 
 ![Machine](rotaryAxis.jpg)
 
-The `outline.py` script loads a 3D model and generates profile SVG files that can be
-imported into Illustrator to cut the outlines from various angles.
-
+You can read the [full writeup](http://retrotechjournal.com/2015/09/01/cutting-3d-shapes-on-a-laser-cutter/).
