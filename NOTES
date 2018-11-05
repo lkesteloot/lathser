@@ -1,16 +1,21 @@
 
 To do next:
-    - Fix raster output.
-        - Try bi-directional.
+    - Make proper web page:
+        - Offer which model to load.
+        - Show model in 3D with controls.
+        - Add buttons for:
+            - Generating PRN.
+            - Generating SVG.
+        - Change algorithm to be callback-based so we can update UI between steps.
+        - Update 3D UI between steps.
+        - Show image being calculated.
     - Cut both sides:
         - 0
         - 180
         - 180 + 1/16
         - 0 + 1/16
         - ...
-    - Get zero point correct.
     - Try DNA.
-    - Write simulator of cuts as a web page.
     - Increase kerf to get better ears.
     - Try output from ctrl-cut.
         - http://timgolden.me.uk/python/win32_how_do_i/print.html#win32print
